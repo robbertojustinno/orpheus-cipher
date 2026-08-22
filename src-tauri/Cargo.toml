@@ -1,6 +1,6 @@
 [package]
 name = "orpheus"
-version = "0.4.0"
+version = "0.5.0"
 description = "ORPHEUS — Sistema de Inteligência"
 authors = ["CIPHER"]
 edition = "2021"
@@ -15,4 +15,5 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = [] }
 tauri-plugin-store = "2"
+tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }

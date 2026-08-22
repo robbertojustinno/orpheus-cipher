@@ -1,0 +1,15 @@
+export type SearchTargetType='person'|'username'|'email'|'domain'|'company'|'organization'|'keyword'|'document'|'unknown'
+export type SearchMode='quick'|'deep'|'dork'
+export type ResultType='web'|'document'|'profile'|'domain'|'mention'|'identifier'
+export type Confidence='LOW'|'MEDIUM'|'HIGH'
+export type ProviderStatus='enabled'|'disabled'|'unavailable'|'rate-limited'
+export interface SearchTarget{raw:string;normalized:string;type:SearchTargetType;alternatives?:SearchTargetType[]}
+export interface SearchQuery{id:string;value:string;strategy:string}
+export interface OsintResult{id:string;source:string;title:string;url:string;snippet?:string;resultType:ResultType;confidence?:number;discoveredAt:string;metadata?:Record<string,string>;devData?:boolean}
+export interface ProviderRunStatus{id:string;name:string;status:ProviderStatus|'searching'|'complete'|'failed';resultCount:number;error?:string}
+export interface Correlation{id:string;kind:'domain'|'username'|'name'|'organization';value:string;resultIds:string[];confidence:Confidence;explanation:string}
+export interface SearchSession{id:string;query:string;targetType:SearchTargetType;mode:SearchMode;createdAt:string;results:OsintResult[];correlations:Correlation[];plan:SearchQuery[];providers:ProviderRunStatus[];privateMode:boolean}
+export interface SearchContext{target:SearchTarget;mode:SearchMode;signal:AbortSignal;limit:number;timeoutMs:number}
+export interface SearchProvider{id:string;name:string;status:ProviderStatus;supports(target:SearchTarget):boolean;search(query:SearchQuery,context:SearchContext):Promise<OsintResult[]>}
+export interface DorkFields{term?:string;domain?:string;filetype?:string;title?:string;url?:string;exclude?:string}
+export interface SearchExport{query:string;createdAt:string;results:OsintResult[]}

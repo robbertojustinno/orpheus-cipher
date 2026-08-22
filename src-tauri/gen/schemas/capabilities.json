@@ -1,1 +1,1 @@
-{"default":{"identifier":"default","description":"Permissões mínimas da janela principal do ORPHEUS","local":true,"windows":["main"],"permissions":["core:default","store:default"]}}
+{"default":{"identifier":"default","description":"Permissões mínimas da janela principal do ORPHEUS","local":true,"windows":["main"],"permissions":["core:default","store:default",{"identifier":"opener:allow-open-url","allow":[{"url":"https://*"},{"url":"http://*"}]}]}}

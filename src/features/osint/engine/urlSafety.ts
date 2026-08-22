@@ -1,0 +1,2 @@
+export function isSafeExternalUrl(value:string){try{const url=new URL(value);return(url.protocol==='http:'||url.protocol==='https:')&&Boolean(url.hostname)}catch{return false}}
+export function normalizeUrl(value:string){if(!isSafeExternalUrl(value))return'';const url=new URL(value);url.hash='';for(const key of [...url.searchParams.keys()])if(/^utm_|^(fbclid|gclid)$/i.test(key))url.searchParams.delete(key);url.hostname=url.hostname.toLowerCase();url.pathname=url.pathname.replace(/\/$/,'')||'/';return url.toString()}

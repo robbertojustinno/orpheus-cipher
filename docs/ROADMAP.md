@@ -10,4 +10,4 @@
 - Phase 8 — Narrative Expansion
 - Phase 9 — Production Release
 
-Installers should be distributed through GitHub Releases or another controlled release channel rather than committed to normal Git history. No Release is published during Phase 4.
+Installers should be distributed through GitHub Releases or another controlled release channel rather than committed to normal Git history. No Release is published during Phase 5.

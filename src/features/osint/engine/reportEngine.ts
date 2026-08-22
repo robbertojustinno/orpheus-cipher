@@ -1,0 +1,2 @@
+import type{SearchSession}from'../types/osint'
+export function createPreliminaryReport(session:SearchSession){return`ORPHEUS OSINT // PRELIMINARY REPORT\n\nTARGET: ${session.query}\nTYPE: ${session.targetType.toUpperCase()}\nMODE: ${session.mode.toUpperCase()}\nCREATED: ${session.createdAt}\nUNIQUE RESULTS: ${session.results.length}\nRELATIONSHIPS: ${session.correlations.length}\n\nConfidence indicates public-signal strength, not identity certainty.`}

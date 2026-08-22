@@ -1,0 +1,2 @@
+import type{OsintResult}from'../types/osint';import{isSafeExternalUrl,normalizeUrl}from'./urlSafety'
+export function normalizeResult(result:OsintResult):OsintResult|null{if(!isSafeExternalUrl(result.url))return null;return{...result,title:result.title.trim().replace(/\s+/g,' '),url:normalizeUrl(result.url),snippet:result.snippet?.trim().replace(/\s+/g,' '),confidence:result.confidence===undefined?undefined:Math.max(0,Math.min(1,result.confidence))}}

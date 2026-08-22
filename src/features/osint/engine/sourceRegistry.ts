@@ -1,0 +1,2 @@
+import type{SearchProvider}from'../types/osint';import{DevelopmentSearchProvider}from'../providers/developmentSearchProvider';import{DocumentProvider}from'../providers/documentProvider';import{DomainProvider}from'../providers/domainProvider';import{UsernameProvider}from'../providers/usernameProvider';import{WebSearchProvider}from'../providers/webSearchProvider'
+export function createSourceRegistry():SearchProvider[]{return[new WebSearchProvider(),new DocumentProvider(),new DomainProvider(),new UsernameProvider(),...(import.meta.env.DEV?[new DevelopmentSearchProvider()]:[])]}

@@ -1,0 +1,3 @@
+import type{OsintResult}from'../types/osint';import{normalizeResult}from'./resultNormalizer'
+const titleKey=(title:string)=>title.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'')
+export function deduplicateResults(results:OsintResult[]){const seenUrls=new Set<string>();const seenTitles=new Set<string>();const output:OsintResult[]=[];for(const raw of results){const item=normalizeResult(raw);if(!item)continue;const title=titleKey(item.title);if(seenUrls.has(item.url)||title.length>12&&seenTitles.has(title))continue;seenUrls.add(item.url);if(title)seenTitles.add(title);output.push(item)}return output}

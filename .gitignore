@@ -13,6 +13,9 @@ orpheus-state.json
 *.temp
 .vite/
 coverage/
+osint-cache/
+search-data/
+exports/
 
 backups/
 *.msi

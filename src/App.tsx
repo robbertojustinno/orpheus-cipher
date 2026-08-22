@@ -13,6 +13,7 @@ import { EnigmaModal } from './features/enigmas/EnigmaModal'
 import { DetectionSequence } from './features/narrative/DetectionSequence'
 import { PrivacyPanel } from './features/operator/PrivacyPanel'
 import { ModulePanel } from './features/modules/ModulePanel'
+import { DeepSearchPanel, type OsintRequest } from './features/osint/components/DeepSearchPanel'
 import type { TerminalAction } from './features/terminal/commandTypes'
 import { useNarrativeStore } from './stores/narrativeStore'
 import type { Enigma, OperatorIdentity } from './types'
@@ -29,6 +30,7 @@ function App(){
   const[interference,setInterference]=useState(false)
   const[selected,setSelected]=useState<Enigma|null>(null)
   const[searchQuery,setSearchQuery]=useState('')
+  const[osintRequest,setOsintRequest]=useState<OsintRequest>({nonce:0})
   const[dossierSubject,setDossierSubject]=useState('')
   const[highlightObjective,setHighlightObjective]=useState(false)
   const{hydration,progress,logs,enigmas,setLogs,addTerminalLog,setNarrativeState,startMission,openEnigma,submitEnigmaAnswer,unlockHint,devSetEnigma,resetNarrative,recordAudit}=useNarrativeStore()
@@ -45,10 +47,11 @@ function App(){
     if(action.type==='navigate'){setActive(action.destination);return}
     if(action.type==='open-enigma'){const enigma=enigmas.find(item=>item.id===action.enigmaId);if(enigma)handleEnigma(enigma);return}
     if(action.type==='highlight-objective'){setHighlightObjective(true);window.setTimeout(()=>setHighlightObjective(false),2400);return}
-    if(action.type==='prepare-search'){setSearchQuery(action.query);setActive('Pesquisa Profunda');return}
+    if(action.type==='prepare-search'){setSearchQuery(action.query);setOsintRequest({nonce:Date.now(),query:action.query,mode:'quick',action:'prepare'});setActive('Pesquisa Profunda');return}
     if(action.type==='open-dossier'){setDossierSubject(action.subject);setActive('Dossiê');void recordAudit('DOSSIER_ACCESSED',action.subject)}
     if(action.type==='request-hint'){const result=await unlockHint(action.enigmaId);addTerminalLog(result.allowed?{source:'ORPHEUS',type:'success',message:`${result.hintId} liberada.`}:{source:'CIPHER',type:'warning',message:'HINT ACCESS DENIED. ADDITIONAL ANALYSIS REQUIRED.'});return}
     if(action.type==='submit-answer'){const result=await submitEnigmaAnswer(action.enigmaId,action.answer);if(result.correct)addTerminalLog({source:'ORPHEUS',type:'success',message:'PATTERN CONFIRMED. FRAGMENT RESTORED.'});return}
+    if(action.type==='osint'){setOsintRequest({nonce:Date.now(),query:action.query,mode:action.mode,action:action.action,format:action.format});setActive(action.mode==='dork'?'Deep Dorks':'Pesquisa Profunda');return}
   }
   const overall=calculateOverallProgress(enigmaDefinitions,progress)
   const dashboard=!['Privacidade','Pesquisa Profunda','Dossiê','Deep Dorks'].includes(active)
@@ -58,7 +61,7 @@ function App(){
   return <div className={`${styles.app} ${interference?styles.interference:''}`}>
     {hydration==='ready'&&<DetectionSequence state={progress.narrativeState} firstDetectionCompleted={progress.firstDetectionCompleted} identity={progress.operator} setState={setNarrativeState} addLog={addTerminalLog} setInterference={setInterference}/>}
     <TopBar onMenu={()=>setMenu(true)} identity={displayIdentity} founderAccess={formatFounderAccess(progress.founderId,progress.founderTotal)}/>
-    <Sidebar active={active} open={menu} onClose={()=>setMenu(false)} onNavigate={label=>{setActive(label);if(label!=='Painel'&&label!=='Privacidade')notify(`${label.toUpperCase()} // Módulo em preparação`)}}/>
+    <Sidebar active={active} open={menu} onClose={()=>setMenu(false)} onNavigate={label=>{setActive(label);if(!['Painel','Privacidade','Pesquisa Profunda','Deep Dorks'].includes(label))notify(`${label.toUpperCase()} // Módulo em preparação`)}}/>
     {menu&&<button className={styles.overlay} onClick={()=>setMenu(false)} aria-label="Fechar menu"/>}
     <main className={styles.main}>
       <div className={styles.breadcrumb}>
@@ -89,7 +92,7 @@ function App(){
           </RightWidget>
           <RightWidget title="MAPA DE CONEXÕES" code="NET.08"><ConnectionMap operatorName={displayIdentity.username}/></RightWidget>
         </aside>
-      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<ModulePanel module="search" query={searchQuery} onQueryChange={setSearchQuery}/>:active==='Dossiê'?<ModulePanel module="dossier" subject={dossierSubject}/>:<ModulePanel module="dorks"/>}
+      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<DeepSearchPanel initialQuery={searchQuery} request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:active==='Deep Dorks'?<DeepSearchPanel initialQuery={searchQuery} initialMode="dork" request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:<ModulePanel module="dossier" subject={dossierSubject}/>}
     </main>
     <StatusBar/>
     {selected&&(()=>{const current=enigmas.find(item=>item.id===selected.id)??selected;return <EnigmaModal enigma={current} onClose={()=>setSelected(null)} onSubmit={answer=>submitEnigmaAnswer(current.id,answer)} onHint={()=>unlockHint(current.id)} onDevAction={import.meta.env.DEV?action=>{void devSetEnigma(current.id,action)}:undefined}/>})()}

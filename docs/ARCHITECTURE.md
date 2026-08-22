@@ -47,3 +47,19 @@ EnigmaWorkspace / terminal actions
 Definitions contain public metadata, placeholder evidence references, hint policy, prerequisites and typed unlock effects. State contains status, progress, attempts, unlocked hint identifiers and solution timestamp. Entered answers never become part of persisted state.
 
 `LocalDevelopmentValidator` is restricted to DEV with visibly fictitious test values. `ProductionValidator` deliberately returns `VALIDATOR_UNAVAILABLE` until an external validation service is designed. Founder ranges and non-linear prerequisite arrays are represented without introducing exclusive campaign content.
+
+## Phase 5 — Deep Search
+
+```text
+DeepSearchPanel / terminal actions
+  → target detection + Query Planner
+  → provider registry
+  → timeout / cancellation / result limits
+  → normalization + deduplication
+  → initial correlation
+  → result filters / OSINT investigation map / export
+```
+
+Providers are independent adapters with explicit status. Public RDAP is enabled for domain targets. General web, document and username adapters expose configuration points but remain unavailable until an authorized backend exists. Development data is compiled only in DEV.
+
+Search history uses `orpheus-search.json`, separate from `orpheus-state.json`. Private searches are retained only in memory. The current Store is intentionally capped at 20 sessions and 100 results per deep search; a future SQLite layer can replace the adapter without changing the engine.

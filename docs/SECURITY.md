@@ -28,3 +28,16 @@ The repository contains engine code and explicit development placeholders only. 
 ## Secret commands
 
 Secret commands are excluded from public help, autocomplete and README output. No book-dependent triggers are defined until they can be checked against the final manuscript.
+
+## OSINT boundaries
+
+- only public, indexed or explicitly authorized sources;
+- no scraping bypass, authentication, exploitation or remote shell;
+- only `http` and `https` URLs may open in the system browser;
+- credential-oriented dorks are blocked and absent from the public template library;
+- no API key is embedded in the frontend;
+- failures and rate limits are isolated per provider;
+- searches marked private are never written to search history;
+- OSINT exports contain only the selected search session, never narrative state.
+
+The Tauri opener capability is scoped to HTTP/HTTPS. Results are not loaded inside the application WebView.

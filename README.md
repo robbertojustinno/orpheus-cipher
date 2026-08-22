@@ -41,8 +41,8 @@ npm run tauri:build
 
 Artefatos:
 
-- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.4.0_x64-setup.exe`
-- `src-tauri/target/release/bundle/msi/ORPHEUS_0.4.0_x64_en-US.msi`
+- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.5.0_x64-setup.exe`
+- `src-tauri/target/release/bundle/msi/ORPHEUS_0.5.0_x64_en-US.msi`
 
 ## Testes
 
@@ -68,6 +68,12 @@ Comandos narrativos secretos possuem uma infraestrutura separada e não aparecem
 As Caixas Enigmas usam uma engine desacoplada para tentativas, pistas progressivas, pré-requisitos, progresso ponderado e efeitos de desbloqueio. O workspace preserva o visual aprovado e apresenta briefing, evidências, pistas e validação como um arquivo classificado.
 
 Este repositório contém somente a engine pública e placeholders explícitos. Respostas canônicas, spoilers e chaves narrativas não são armazenados no frontend. A build de produção usa um provider sem validação local; respostas fictícias e ferramentas de teste existem apenas no modo DEV e são removidas do bundle de produção.
+
+## Phase 5 — Deep Search
+
+Pesquisa Profunda oferece Quick Search, Deep Search e Deep Dorks com planner visível, providers desacoplados, deduplicação, correlação explicável, filtros, cancelamento, timeout e exportação JSON/CSV. Consultas manuais são abertas somente no navegador padrão. URLs fora de HTTP/HTTPS são bloqueadas.
+
+O provider RDAP consulta informações públicas de domínio sem chave. Adapters de busca web, documentos e usernames permanecem indisponíveis até que um backend autorizado seja configurado; a produção nunca fabrica resultados. O provider fictício é restrito ao modo DEV e identificado como `DEV DATA`.
 
 Detalhes adicionais:
 
