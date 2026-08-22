@@ -1,0 +1,3 @@
+import type{OperatorIdentity}from'../types'
+const fallbackIdentity=():OperatorIdentity=>({username:'OPERADOR',hostname:'HOST-UNKNOWN',platform:navigator.platform?.toLowerCase()||'unknown',arch:'unknown'})
+export async function getOperatorIdentity():Promise<OperatorIdentity>{try{if('__TAURI_INTERNALS__'in window){const{invoke}=await import('@tauri-apps/api/core');const value=await invoke<OperatorIdentity>('get_operator_identity');return{username:value.username?.trim()||'OPERADOR',hostname:value.hostname?.trim()||'HOST-UNKNOWN',platform:value.platform?.trim()||'unknown',arch:value.arch?.trim()||'unknown'}}}catch(error){console.warn('[ORPHEUS] Identidade local indisponível; usando fallback seguro.',error)}return fallbackIdentity()}

@@ -1,0 +1,2 @@
+import styles from'./StatusBar.module.css'
+export function StatusBar(){return <footer className={styles.bar}><div className={styles.nominal}><i/><small>STATUS DO SISTEMA:</small><strong>TODOS OS SISTEMAS NOMINAIS</strong></div><div className={styles.network}><small>TRÁFEGO DE REDE:</small><strong>2.48 MB/s</strong><svg viewBox="0 0 90 22"><polyline points="0,16 7,14 14,18 21,8 28,13 35,5 42,15 49,12 56,18 63,7 70,10 77,3 84,11 90,8"/></svg></div><div><small>CRIPTOGRAFIA:</small><strong>AES-256 / RSA-4096</strong></div><span>ORPHEUS OS&nbsp; v4.9.12</span></footer>}

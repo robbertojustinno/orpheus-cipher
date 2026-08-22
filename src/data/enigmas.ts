@@ -1,0 +1,6 @@
+import type{Enigma}from'../types'
+export const enigmaDefinitions:Enigma[]=[
+ {id:'box-01',number:1,title:'Enigma 01 — A Caixa',subtitle:'ARQUIVO NARRATIVO',description:'A primeira peça sempre revela mais do que guarda.',status:'locked',progress:0,category:'book',requiresBookKnowledge:true,placeholderHint:'Conteúdo temporário. A pista definitiva será criada a partir do romance.'},
+ {id:'box-02',number:2,title:'Enigma 02 — CIPHER',subtitle:'ARQUIVO CIFRADO',description:'Linguagem, padrão, chave. O código está onde não se vê.',status:'locked',progress:0,requiresPrevious:'box-01',category:'cipher',placeholderHint:'Conteúdo temporário. A cifra e sua resposta ainda não foram definidas.'},
+ {id:'box-03',number:3,title:'Enigma 03 — Evelyn',subtitle:'ARQUIVO NARRATIVO',description:'Memórias fragmentadas. Confie, mas verifique.',status:'locked',progress:0,requiresPrevious:'box-02',category:'book',requiresBookKnowledge:true,placeholderHint:'Conteúdo temporário. Dependerá de conhecimento real do livro.'},
+ {id:'box-04',number:4,title:'Enigma 04 — Orpheus',subtitle:'PROTOCOLO NARRATIVO',description:'O protocolo desperta quando tudo se conecta.',status:'locked',progress:0,requiresPrevious:'box-03',category:'narrative',placeholderHint:'Conteúdo temporário. Nenhuma resposta canônica foi adicionada.'}]

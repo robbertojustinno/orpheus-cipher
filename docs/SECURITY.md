@@ -1,0 +1,24 @@
+# Security
+
+## Terminal threat model
+
+The ORPHEUS terminal is a deterministic application command parser, not a system terminal. Only names registered in `commandRegistry.ts` or the private secret registry can execute application handlers.
+
+The following capabilities are deliberately absent:
+
+- shell invocation;
+- arbitrary process spawning;
+- `eval` or dynamic code execution;
+- forwarding commands to CMD, PowerShell, Bash or SH;
+- automatic `curl`, `wget` or external search execution;
+- access to passwords, tokens, browser data, documents or personal files.
+
+Inputs such as `powershell Get-ChildItem`, `cmd /c dir`, `bash`, `sh`, `curl` and `wget` return `COMMAND NOT RECOGNIZED` and produce no external action.
+
+## Audit data
+
+Audit records contain only event type, timestamp and an application resource identifier. Raw command arguments and sensitive operating-system data are not written to the audit trail.
+
+## Secret commands
+
+Secret commands are excluded from public help, autocomplete and README output. No book-dependent triggers are defined until they can be checked against the final manuscript.

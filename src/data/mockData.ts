@@ -1,0 +1,2 @@
+import type{NavItem}from'../types'
+export const navigation:NavItem[]=[{label:'Painel',icon:'grid'},{label:'Pesquisa Profunda',icon:'search'},{label:'Deep Dorks',icon:'terminal'},{label:'Dossiê',icon:'file'},{label:'Arquivos',icon:'archive'},{label:'Caixa de Enigmas',icon:'box',alert:true},{label:'Mensagens',icon:'message',badge:3},{label:'Missões',icon:'target'},{label:'Relatório Final',icon:'report'},{label:'Privacidade',icon:'lock'}]

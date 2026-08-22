@@ -1,0 +1,8 @@
+import { Icon } from '../../components/Icon'
+import styles from './ModulePanel.module.css'
+
+interface Props{module:'search'|'dossier'|'dorks';query?:string;subject?:string;onQueryChange?:(value:string)=>void}
+export function ModulePanel({module,query='',subject='',onQueryChange}:Props){
+ const content={search:{code:'SEARCH.01',title:'PESQUISA PROFUNDA',description:'Consulta preparada localmente. Nenhuma pesquisa externa será executada sem uma ação adicional do operador.'},dossier:{code:'DOSSIER.01',title:'ÍNDICE DE DOSSIÊS',description:'Conteúdo narrativo restrito ao material canônico já validado.'},dorks:{code:'DORKS.01',title:'DEEP DORKS',description:'Módulo preparado. Consultas ofensivas ou automáticas não estão disponíveis nesta build.'}}[module]
+ return <section className={styles.panel}><header><div><Icon name={module==='search'?'search':module==='dossier'?'file':'terminal'} size={23}/></div><span><small>ORPHEUS // {content.code}</small><h1>{content.title}</h1></span></header><p>{content.description}</p>{module==='search'&&<label><span>CONSULTA PREPARADA</span><input value={query} onChange={event=>onQueryChange?.(event.target.value)} autoFocus/><button>AGUARDAR AUTORIZAÇÃO</button></label>}{module==='dossier'&&<div className={styles.result}><small>CLASSIFIED INDEX</small><strong>{subject?subject.toUpperCase():'SELECIONE UM REGISTRO'}</strong><p>{subject?'DOSSIER FOUND. Visualização canônica ainda não vinculada nesta fase.':'Use o terminal: dossier blake, evelyn, gordon, cipher ou orpheus.'}</p></div>}{module==='dorks'&&<div className={styles.result}><small>MODULE STATUS</small><strong>STANDBY</strong><p>Nenhuma consulta foi executada.</p></div>}</section>
+}
