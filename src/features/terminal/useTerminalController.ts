@@ -3,7 +3,7 @@ import type { AuditEventType, Enigma, NarrativeProgress, TerminalLog } from '../
 import { autocompleteCommand, executeCommand } from './commandExecutor'
 import { findCommand } from './commandRegistry'
 import { parseCommand } from './commandParser'
-import { appendHistory, historyAt } from './terminalHistory'
+import { appendHistory, historyAt, redactSensitiveCommand } from './terminalHistory'
 import type { TerminalAction } from './commandTypes'
 import { playSoundCue } from '../../services/soundService'
 
@@ -15,7 +15,7 @@ interface Options{
  progress:NarrativeProgress
  enigmas:Enigma[]
  setLogs:Dispatch<SetStateAction<TerminalLog[]>>
- onAction:(action:TerminalAction)=>void
+ onAction:(action:TerminalAction)=>void|Promise<void>
  onAudit:(type:AuditEventType,resource?:string)=>void
 }
 
@@ -27,10 +27,11 @@ export function useTerminalController({progress,enigmas,setLogs,onAction,onAudit
 
  const submit=useCallback(async()=>{
   const raw=input.trim();if(!raw||busy)return
+  const masked=redactSensitiveCommand(raw)
   playSoundCue('terminal')
-  const nextHistory=appendHistory(history,raw)
+  const nextHistory=appendHistory(history,masked)
   setHistory(nextHistory);setHistoryIndex(-1);setInput('');setBusy(true)
-  setLogs(current=>[...current,entry(raw,'command','cipher')])
+  setLogs(current=>[...current,entry(masked,'command','cipher')])
   const parsed=parseCommand(raw);const registered=findCommand(parsed.command)
   onAudit('COMMAND_EXECUTED',registered?.name??'unrecognized')
   const result=executeCommand(raw,{progress,enigmas,history:nextHistory})
@@ -40,7 +41,7 @@ export function useTerminalController({progress,enigmas,setLogs,onAction,onAudit
   const clears=result.actions?.some(action=>action.type==='clear')
   if(clears)setLogs([])
   else if(result.output)setLogs(current=>[...current,entry(result.output,'output',result.tone??'info')])
-  result.actions?.filter(action=>action.type!=='clear').forEach(action=>onAction(action))
+  for(const action of result.actions?.filter(action=>action.type!=='clear')??[])await onAction(action)
   setBusy(false)
  },[input,busy,history,setLogs,progress,enigmas,onAction,onAudit])
 

@@ -19,6 +19,12 @@ Inputs such as `powershell Get-ChildItem`, `cmd /c dir`, `bash`, `sh`, `curl` an
 
 Audit records contain only event type, timestamp and an application resource identifier. Raw command arguments and sensitive operating-system data are not written to the audit trail.
 
+Answers submitted through the workspace or `answer` command are transient. Terminal history displays `[REDACTED]`, audit records contain only the enigma identifier, and no answer is placed in native persistence or production console output.
+
+## Public repository boundary
+
+The repository contains engine code and explicit development placeholders only. It must not contain canonical answers, book spoilers, secret triggers, premium content, personal saves or credentials. Production builds do not contain the DEV validator table or DEV panel. Short canonical answers must eventually be validated outside the distributed frontend; local hashes are not treated as adequate secrecy.
+
 ## Secret commands
 
 Secret commands are excluded from public help, autocomplete and README output. No book-dependent triggers are defined until they can be checked against the final manuscript.

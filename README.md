@@ -41,8 +41,8 @@ npm run tauri:build
 
 Artefatos:
 
-- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.2.0_x64-setup.exe`
-- `src-tauri/target/release/bundle/msi/ORPHEUS_0.2.0_x64_en-US.msi`
+- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.4.0_x64-setup.exe`
+- `src-tauri/target/release/bundle/msi/ORPHEUS_0.4.0_x64_en-US.msi`
 
 ## Testes
 
@@ -62,6 +62,12 @@ O Terminal de Atividade aceita comandos internos registrados pelo ORPHEUS, mant�
 O terminal não é CMD, PowerShell, Bash ou qualquer outro shell. A entrada nunca é encaminhada ao sistema operacional, a processos externos ou a avaliação dinâmica. Somente handlers presentes no command registry podem produzir ações controladas dentro do aplicativo.
 
 Comandos narrativos secretos possuem uma infraestrutura separada e não aparecem no help, autocomplete ou documentação pública. Nenhum trigger dependente do livro foi definido nesta fase.
+
+## Phase 4 — ORPHEUS Enigma Engine
+
+As Caixas Enigmas usam uma engine desacoplada para tentativas, pistas progressivas, pré-requisitos, progresso ponderado e efeitos de desbloqueio. O workspace preserva o visual aprovado e apresenta briefing, evidências, pistas e validação como um arquivo classificado.
+
+Este repositório contém somente a engine pública e placeholders explícitos. Respostas canônicas, spoilers e chaves narrativas não são armazenados no frontend. A build de produção usa um provider sem validação local; respostas fictícias e ferramentas de teste existem apenas no modo DEV e são removidas do bundle de produção.
 
 Detalhes adicionais:
 

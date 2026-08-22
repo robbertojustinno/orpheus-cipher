@@ -8,8 +8,10 @@ export type TerminalAction =
   | {type:'highlight-objective'}
   | {type:'prepare-search';query:string}
   | {type:'open-dossier';subject:string}
+  | {type:'request-hint';enigmaId:string}
+  | {type:'submit-answer';enigmaId:string;answer:string}
 
-export interface CommandResult { output:string; tone?:TerminalLogType; delayMs?:number; pendingText?:string; actions?:TerminalAction[] }
+export interface CommandResult { output:string; tone?:TerminalLogType; delayMs?:number; pendingText?:string; actions?:TerminalAction[]; sensitive?:boolean }
 export interface CommandContext { progress:NarrativeProgress; enigmas:Enigma[]; history:string[] }
 export type CommandHandler=(args:string[],context:CommandContext)=>CommandResult
 

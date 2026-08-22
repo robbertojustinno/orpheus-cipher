@@ -19,7 +19,7 @@ export interface NarrativePersistenceAdapter {
 interface StorageLike { getItem(key:string):string|null; setItem(key:string,value:string):void; removeItem(key:string):void }
 
 export function createInitialPersistedNarrativeState():PersistedNarrativeState{
-  return{version:1,narrativeState:'INITIAL',firstDetectionCompleted:false,missionStarted:false,founderId:SYSTEM_CONFIG.founderId,founderTotal:SYSTEM_CONFIG.founderTotal,enigmas:Object.fromEntries(enigmaDefinitions.map(enigma=>[enigma.id,{status:'locked',progress:0}])),unlockedFiles:[],restoredFragments:[],discoveredCommands:[],auditEvents:[]}
+  return{version:1,narrativeState:'INITIAL',firstDetectionCompleted:false,missionStarted:false,founderId:SYSTEM_CONFIG.founderId,founderTotal:SYSTEM_CONFIG.founderTotal,enigmas:Object.fromEntries(enigmaDefinitions.map(enigma=>[enigma.id,{status:'locked',progress:0,attempts:0,hintsUnlocked:[]}])),unlockedFiles:[],unlockedMessages:[],unlockedDossiers:[],unlockedMapNodes:[],restoredFragments:[],discoveredCommands:[],auditEvents:[]}
 }
 
 /** Normaliza saves antigos e deixa o ponto de extensão pronto para versões futuras. */
@@ -34,13 +34,14 @@ export function migrateNarrativeState(value:unknown):PersistedNarrativeState{
     const entry=legacyStatuses[definition.id]
     if(entry&&typeof entry==='object'){
       const candidate=entry as{status?:unknown;progress?:unknown}
-      migratedEnigmas[definition.id]={status:VALID_ENIGMA_STATES.includes(candidate.status as EnigmaStatus)?candidate.status as EnigmaStatus:'locked',progress:typeof candidate.progress==='number'?candidate.progress:0}
+      migratedEnigmas[definition.id]={status:VALID_ENIGMA_STATES.includes(candidate.status as EnigmaStatus)?candidate.status as EnigmaStatus:'locked',progress:typeof candidate.progress==='number'?candidate.progress:0,attempts:typeof(candidate as Record<string,unknown>).attempts==='number'?(candidate as Record<string,number>).attempts:0,hintsUnlocked:Array.isArray((candidate as Record<string,unknown>).hintsUnlocked)?(candidate as Record<string,unknown[]>).hintsUnlocked.filter(item=>typeof item==='string') as string[]:[],solvedAt:typeof(candidate as Record<string,unknown>).solvedAt==='string'?(candidate as Record<string,string>).solvedAt:undefined}
     }else if(VALID_ENIGMA_STATES.includes(entry as EnigmaStatus)){
-      migratedEnigmas[definition.id]={status:entry as EnigmaStatus,progress:typeof legacyProgress[definition.id]==='number'?legacyProgress[definition.id] as number:0}
+      migratedEnigmas[definition.id]={status:entry as EnigmaStatus,progress:typeof legacyProgress[definition.id]==='number'?legacyProgress[definition.id] as number:0,attempts:0,hintsUnlocked:[]}
     }
   }
   const narrativeState=VALID_STATES.includes(source.narrativeState as NarrativeState)?source.narrativeState as NarrativeState:'INITIAL'
-  return{version:1,narrativeState,firstDetectionCompleted:Boolean(source.firstDetectionCompleted??source.firstExecutionCompleted),missionStarted:Boolean(source.missionStarted??narrativeState==='MISSION_ACTIVE'),founderId:typeof source.founderId==='number'?source.founderId:defaults.founderId,founderTotal:typeof source.founderTotal==='number'?source.founderTotal:defaults.founderTotal,enigmas:migratedEnigmas,unlockedFiles:Array.isArray(source.unlockedFiles)?source.unlockedFiles.filter(item=>typeof item==='string') as string[]:[],restoredFragments:Array.isArray(source.restoredFragments)?source.restoredFragments.filter(item=>typeof item==='string') as string[]:[],discoveredCommands:Array.isArray(source.discoveredCommands)?source.discoveredCommands.filter(item=>typeof item==='string') as string[]:[],auditEvents:Array.isArray(source.auditEvents)?source.auditEvents.filter(item=>item&&typeof item==='object') as PersistedNarrativeState['auditEvents']:[],lastSessionAt:typeof source.lastSessionAt==='string'?source.lastSessionAt:undefined}
+  const strings=(value:unknown)=>Array.isArray(value)?value.filter(item=>typeof item==='string') as string[]:[]
+  return{version:1,narrativeState,firstDetectionCompleted:Boolean(source.firstDetectionCompleted??source.firstExecutionCompleted),missionStarted:Boolean(source.missionStarted??narrativeState==='MISSION_ACTIVE'),founderId:typeof source.founderId==='number'?source.founderId:defaults.founderId,founderTotal:typeof source.founderTotal==='number'?source.founderTotal:defaults.founderTotal,enigmas:migratedEnigmas,unlockedFiles:strings(source.unlockedFiles),unlockedMessages:strings(source.unlockedMessages),unlockedDossiers:strings(source.unlockedDossiers),unlockedMapNodes:strings(source.unlockedMapNodes),restoredFragments:strings(source.restoredFragments),discoveredCommands:strings(source.discoveredCommands),auditEvents:Array.isArray(source.auditEvents)?source.auditEvents.filter(item=>item&&typeof item==='object') as PersistedNarrativeState['auditEvents']:[],currentMissionId:typeof source.currentMissionId==='string'?source.currentMissionId:undefined,lastSessionAt:typeof source.lastSessionAt==='string'?source.lastSessionAt:undefined}
 }
 
 export class WebNarrativePersistence implements NarrativePersistenceAdapter{

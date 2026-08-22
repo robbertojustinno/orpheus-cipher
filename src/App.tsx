@@ -16,6 +16,8 @@ import { ModulePanel } from './features/modules/ModulePanel'
 import type { TerminalAction } from './features/terminal/commandTypes'
 import { useNarrativeStore } from './stores/narrativeStore'
 import type { Enigma, OperatorIdentity } from './types'
+import { calculateOverallProgress } from './features/enigmas/engine/progressionEngine'
+import { enigmaDefinitions } from './data/enigmas'
 import styles from './App.module.css'
 
 const anonymousIdentity:OperatorIdentity={username:'OPERADOR',hostname:'HOST-UNKNOWN',platform:'unknown',arch:'unknown'}
@@ -29,23 +31,26 @@ function App(){
   const[searchQuery,setSearchQuery]=useState('')
   const[dossierSubject,setDossierSubject]=useState('')
   const[highlightObjective,setHighlightObjective]=useState(false)
-  const{hydration,progress,logs,enigmas,setLogs,addTerminalLog,setNarrativeState,startMission,resetNarrative,recordAudit}=useNarrativeStore()
+  const{hydration,progress,logs,enigmas,setLogs,addTerminalLog,setNarrativeState,startMission,openEnigma,submitEnigmaAnswer,unlockHint,devSetEnigma,resetNarrative,recordAudit}=useNarrativeStore()
 
   const notify=(message:string)=>{setToast(message);window.setTimeout(()=>setToast(''),2800)}
   const handleEnigma=(enigma:Enigma)=>{
     if(enigma.status==='locked')return
     setSelected(enigma)
+    void openEnigma(enigma.id)
     addTerminalLog({source:'SYSTEM',type:'info',message:`Caixa Enigma ${String(enigma.number).padStart(2,'0')} acessada.`})
     void recordAudit('ENIGMA_OPENED',enigma.id)
   }
-  const handleTerminalAction=(action:TerminalAction)=>{
+  const handleTerminalAction=async(action:TerminalAction)=>{
     if(action.type==='navigate'){setActive(action.destination);return}
     if(action.type==='open-enigma'){const enigma=enigmas.find(item=>item.id===action.enigmaId);if(enigma)handleEnigma(enigma);return}
     if(action.type==='highlight-objective'){setHighlightObjective(true);window.setTimeout(()=>setHighlightObjective(false),2400);return}
     if(action.type==='prepare-search'){setSearchQuery(action.query);setActive('Pesquisa Profunda');return}
     if(action.type==='open-dossier'){setDossierSubject(action.subject);setActive('Dossiê');void recordAudit('DOSSIER_ACCESSED',action.subject)}
+    if(action.type==='request-hint'){const result=await unlockHint(action.enigmaId);addTerminalLog(result.allowed?{source:'ORPHEUS',type:'success',message:`${result.hintId} liberada.`}:{source:'CIPHER',type:'warning',message:'HINT ACCESS DENIED. ADDITIONAL ANALYSIS REQUIRED.'});return}
+    if(action.type==='submit-answer'){const result=await submitEnigmaAnswer(action.enigmaId,action.answer);if(result.correct)addTerminalLog({source:'ORPHEUS',type:'success',message:'PATTERN CONFIRMED. FRAGMENT RESTORED.'});return}
   }
-  const overall=Math.round(enigmas.reduce((sum,enigma)=>sum+enigma.progress,0)/enigmas.length)
+  const overall=calculateOverallProgress(enigmaDefinitions,progress)
   const dashboard=!['Privacidade','Pesquisa Profunda','Dossiê','Deep Dorks'].includes(active)
   const identityVisible=progress.narrativeState==='DETECTED'||progress.narrativeState==='MISSION_ACTIVE'
   const displayIdentity=identityVisible?progress.operator:{...anonymousIdentity,platform:progress.operator.platform,arch:progress.operator.arch}
@@ -87,7 +92,7 @@ function App(){
       </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<ModulePanel module="search" query={searchQuery} onQueryChange={setSearchQuery}/>:active==='Dossiê'?<ModulePanel module="dossier" subject={dossierSubject}/>:<ModulePanel module="dorks"/>}
     </main>
     <StatusBar/>
-    {selected&&<EnigmaModal enigma={selected} onClose={()=>setSelected(null)} onAttempt={()=>{addTerminalLog({source:'SYSTEM',type:'warning',message:'Validação indisponível: conteúdo narrativo ainda não configurado.'});notify('RESPOSTA NÃO PROCESSADA // Placeholder da Fase 2')}}/>}
+    {selected&&(()=>{const current=enigmas.find(item=>item.id===selected.id)??selected;return <EnigmaModal enigma={current} onClose={()=>setSelected(null)} onSubmit={answer=>submitEnigmaAnswer(current.id,answer)} onHint={()=>unlockHint(current.id)} onDevAction={import.meta.env.DEV?action=>{void devSetEnigma(current.id,action)}:undefined}/>})()}
     {toast&&<div className={styles.toast}><i/><div><small>ORPHEUS // SISTEMA</small>{toast}</div></div>}
   </div>
 }

@@ -31,3 +31,19 @@ Identity, narrative state, enigmas, discovered commands and audit events remain 
 ### UI integration
 
 Commands emit typed actions such as `open-enigma`, `prepare-search`, `open-dossier`, `navigate`, and `highlight-objective`. The application resolves these through the same modal and navigation handlers used by direct UI interaction.
+
+## Phase 4 — Enigma Engine
+
+```text
+EnigmaWorkspace / terminal actions
+  → enigmaEngine
+  → EnigmaValidator provider
+  → HintEngine / ProgressionEngine
+  → UnlockEngine
+  → narrativeStore
+  → native persistence + narrative events
+```
+
+Definitions contain public metadata, placeholder evidence references, hint policy, prerequisites and typed unlock effects. State contains status, progress, attempts, unlocked hint identifiers and solution timestamp. Entered answers never become part of persisted state.
+
+`LocalDevelopmentValidator` is restricted to DEV with visibly fictitious test values. `ProductionValidator` deliberately returns `VALIDATOR_UNAVAILABLE` until an external validation service is designed. Founder ranges and non-linear prerequisite arrays are represented without introducing exclusive campaign content.
