@@ -1,0 +1,3 @@
+import type{Evidence}from'../types/investigation'
+export function groupEvidence(items:Evidence[]){return{identity:items.filter(e=>['exact_match','username_match','email_domain'].includes(e.type)),domain:items.filter(e=>e.type==='domain_match'),organization:items.filter(e=>e.type==='organization_reference'),document:items.filter(e=>e.type==='document_reference'),temporal:items.filter(e=>e.type==='temporal'),contradictions:items.filter(e=>e.contradictory||e.type==='contradiction')}}
+export function evidenceFor(ids:string[],items:Evidence[]){const wanted=new Set(ids);return items.filter(item=>wanted.has(item.id))}

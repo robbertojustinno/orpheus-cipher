@@ -41,8 +41,8 @@ npm run tauri:build
 
 Artefatos:
 
-- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.5.0_x64-setup.exe`
-- `src-tauri/target/release/bundle/msi/ORPHEUS_0.5.0_x64_en-US.msi`
+- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.6.0_x64-setup.exe`
+- `src-tauri/target/release/bundle/msi/ORPHEUS_0.6.0_x64_en-US.msi`
 
 ## Testes
 
@@ -74,6 +74,12 @@ Este repositório contém somente a engine pública e placeholders explícitos. 
 Pesquisa Profunda oferece Quick Search, Deep Search e Deep Dorks com planner visível, providers desacoplados, deduplicação, correlação explicável, filtros, cancelamento, timeout e exportação JSON/CSV. Consultas manuais são abertas somente no navegador padrão. URLs fora de HTTP/HTTPS são bloqueadas.
 
 O provider RDAP consulta informações públicas de domínio sem chave. Adapters de busca web, documentos e usernames permanecem indisponíveis até que um backend autorizado seja configurado; a produção nunca fabrica resultados. O provider fictício é restrito ao modo DEV e identificado como `DEV DATA`.
+
+## Phase 6 — Investigation Graph
+
+Resultados públicos podem ser estruturados em entidades, evidências, relações explicáveis, timeline e grafo. O score determinístico expõe seus sinais e não apresenta correlação como identidade comprovada. Revisões do operador preservam a evidência original e hipóteses são rotuladas como `OPERATOR HYPOTHESIS`.
+
+DNS público é enriquecido no backend Rust sem shell. Investigações usam `orpheus-investigations.json`; modo privado fica somente em memória. Exports incluem JSON, CSV separados e relatório HTML offline.
 
 Detalhes adicionais:
 

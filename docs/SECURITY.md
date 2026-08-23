@@ -41,3 +41,12 @@ Secret commands are excluded from public help, autocomplete and README output. N
 - OSINT exports contain only the selected search session, never narrative state.
 
 The Tauri opener capability is scoped to HTTP/HTTPS. Results are not loaded inside the application WebView.
+
+## Investigation privacy and DNS
+
+- Investigations persist only in the application data directory as `orpheus-investigations.json`.
+- Private searches and derived graphs, evidence, notes and hypotheses remain memory-only.
+- Deletion targets only the selected investigation; exports exclude narrative state and enigma answers.
+- Confidence is deterministic, evidence-backed and explicitly non-conclusive.
+- DNS accepts validated domain names only and queries public A, AAAA, MX, NS, CNAME and TXT records through an in-process Rust resolver.
+- No `nslookup`, `dig`, PowerShell, CMD, process spawning or arbitrary network argument is used.

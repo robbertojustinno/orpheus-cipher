@@ -41,6 +41,10 @@ describe('command registry',()=>{
  it('evita duplicações consecutivas no histórico',()=>expect(appendHistory(['status'],'status')).toEqual(['status']))
 })
 
+describe('Phase 6 investigation commands',()=>{
+ it.each([['entities','entities'],['relationships','relationships'],['links','relationships'],['timeline','timeline'],['graph','graph'],['evidence','evidence'],['investigation','investigation'],['trace example.com','trace']])('%s routes only to the internal workspace',(input,action)=>expect(executeCommand(input,context()).actions).toContainEqual(expect.objectContaining({type:'osint',action})))
+})
+
 describe('segurança do terminal',()=>{
  it.each(['powershell Get-ChildItem','cmd.exe /c dir','cmd /c dir','bash -c ls','sh -c ls','curl https://example.com','wget https://example.com'])('%s permanece dentro do parser',input=>{const result=executeCommand(input,context());expect(result.output).toContain('COMMAND NOT RECOGNIZED');expect(result.actions).toBeUndefined()})
 })

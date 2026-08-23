@@ -1,0 +1,3 @@
+import type{InvestigationEntity}from'../types/investigation'
+export function resolveExactEntities(items:InvestigationEntity[]){const seen=new Map<string,InvestigationEntity>();for(const item of items){const key=`${item.type}:${item.normalizedValue}`;const current=seen.get(key);seen.set(key,current?{...current,aliases:[...new Set([...current.aliases,...item.aliases])],evidenceIds:[...new Set([...current.evidenceIds,...item.evidenceIds])],sourceIds:[...new Set([...current.sourceIds,...item.sourceIds])]}:item)}return[...seen.values()]}
+export function mayRepresentSameIdentity(a:InvestigationEntity,b:InvestigationEntity){return a.type===b.type&&['username','email','identifier'].includes(a.type)&&a.normalizedValue===b.normalizedValue}

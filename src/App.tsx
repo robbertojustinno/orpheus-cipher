@@ -92,7 +92,7 @@ function App(){
           </RightWidget>
           <RightWidget title="MAPA DE CONEXÕES" code="NET.08"><ConnectionMap operatorName={displayIdentity.username}/></RightWidget>
         </aside>
-      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<DeepSearchPanel initialQuery={searchQuery} request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:active==='Deep Dorks'?<DeepSearchPanel initialQuery={searchQuery} initialMode="dork" request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:<ModulePanel module="dossier" subject={dossierSubject}/>}
+      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<DeepSearchPanel initialQuery={searchQuery} request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:active==='Deep Dorks'?<DeepSearchPanel initialQuery={searchQuery} initialMode="dork" request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:<ModulePanel module="dossier" subject={dossierSubject}/>}
     </main>
     <StatusBar/>
     {selected&&(()=>{const current=enigmas.find(item=>item.id===selected.id)??selected;return <EnigmaModal enigma={current} onClose={()=>setSelected(null)} onSubmit={answer=>submitEnigmaAnswer(current.id,answer)} onHint={()=>unlockHint(current.id)} onDevAction={import.meta.env.DEV?action=>{void devSetEnigma(current.id,action)}:undefined}/>})()}

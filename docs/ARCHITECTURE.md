@@ -63,3 +63,9 @@ DeepSearchPanel / terminal actions
 Providers are independent adapters with explicit status. Public RDAP is enabled for domain targets. General web, document and username adapters expose configuration points but remain unavailable until an authorized backend exists. Development data is compiled only in DEV.
 
 Search history uses `orpheus-search.json`, separate from `orpheus-state.json`. Private searches are retained only in memory. The current Store is intentionally capped at 20 sessions and 100 results per deep search; a future SQLite layer can replace the adapter without changing the engine.
+
+## Phase 6 — Investigation Graph
+
+`SearchSession` flows through conservative entity extraction, evidence, deterministic confidence scoring, explainable relationships, timeline, bounded graph, operator review and reports. Investigation data uses the separate versioned `orpheus-investigations.json`, capped at 10 investigations, 500 entities and 1,000 relationships. Private sessions bypass persistence.
+
+This bounded volume does not yet justify SQLite; the storage adapter remains the migration boundary. The graph is native SVG. Exact typed values may merge, but name similarity never merges people automatically. DNS enrichment runs through Hickory Resolver in the Rust backend after domain validation, without an operating-system shell.

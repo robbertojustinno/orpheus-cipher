@@ -16,6 +16,11 @@ coverage/
 osint-cache/
 search-data/
 exports/
+*.db
+*.db-shm
+*.db-wal
+investigations/
+reports/
 
 backups/
 *.msi

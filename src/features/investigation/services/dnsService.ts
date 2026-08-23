@@ -1,0 +1,3 @@
+import{invoke}from'@tauri-apps/api/core';import type{DnsRecordSet}from'../types/investigation'
+export function isValidDomain(domain:string){const value=domain.trim().toLowerCase().replace(/\.$/,'');return value.length<=253&&value.includes('.')&&value.split('.').every(label=>label.length>0&&label.length<=63&&/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label))}
+export async function resolvePublicDns(domain:string):Promise<DnsRecordSet>{if(!isValidDomain(domain))throw new Error('INVALID DOMAIN');if(!('__TAURI_INTERNALS__'in window))return{domain,a:[],aaaa:[],mx:[],ns:[],cname:[],txt:[],queriedAt:new Date().toISOString(),status:'UNAVAILABLE'};return invoke<DnsRecordSet>('resolve_public_dns',{domain})}

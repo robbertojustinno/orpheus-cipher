@@ -24,6 +24,12 @@ export const commandRegistry:OrpheusCommand[]=[
  {name:'search',description:'Pesquisa Profunda',execute:(args)=>args.length?{output:`QUERY PREPARED\n\n${args.join(' ')}`,delayMs:250,pendingText:'INDEXING QUERY...',actions:[{type:'prepare-search',query:args.join(' ')}]}:{output:'USAGE\n\nsearch "Empresa XYZ"',tone:'warning'}},
  {name:'deepsearch',description:'executa pesquisa OSINT profunda',execute:(args)=>args.length?{output:`DEEP SEARCH INITIALIZED.\n\nTARGET: ${args.join(' ')}\nOPENING INVESTIGATION WORKSPACE...`,delayMs:300,pendingText:'PLANNING...',actions:[{type:'osint',action:'run',query:args.join(' '),mode:'deep'}]}:{output:'USAGE\n\ndeepsearch "Empresa XYZ"',tone:'warning'}},
  {name:'correlate',description:'correlaciona resultados OSINT',execute:()=>({output:'CORRELATING CURRENT INVESTIGATION...',delayMs:250,pendingText:'CORRELATING...',actions:[{type:'osint',action:'correlate'}]})},
+ {name:'investigation',description:'abre investigação atual',execute:()=>({output:'OPENING INVESTIGATION WORKSPACE...',actions:[{type:'osint',action:'investigation'}]})},
+ {name:'entities',description:'lista entidades investigativas',execute:()=>({output:'OPENING ENTITY INDEX...',actions:[{type:'osint',action:'entities'}]})},
+ {name:'relationships',aliases:['links'],description:'lista relações e evidências',execute:()=>({output:'OPENING RELATIONSHIP INDEX...',actions:[{type:'osint',action:'relationships'}]})},
+ {name:'timeline',description:'abre timeline investigativa',execute:()=>({output:'OPENING VERIFIED TIMELINE...',actions:[{type:'osint',action:'timeline'}]})},
+ {name:'graph',description:'abre grafo investigativo',execute:()=>({output:'RENDERING INVESTIGATION GRAPH...',actions:[{type:'osint',action:'graph'}]})},
+ {name:'evidence',description:'lista evidências rastreáveis',execute:()=>({output:'OPENING EVIDENCE INDEX...',actions:[{type:'osint',action:'evidence'}]})},
  {name:'report',description:'gera relatório OSINT preliminar',execute:()=>({output:'PRELIMINARY REPORT PREPARED.',actions:[{type:'osint',action:'report'}]})},
  {name:'export',description:'exporta investigação em JSON ou CSV',execute:(args)=>args[0]==='json'||args[0]==='csv'?{output:`EXPORT ${args[0].toUpperCase()} PREPARED.`,actions:[{type:'osint',action:'export',format:args[0]}]}:{output:'USAGE\n\nexport json\nexport csv',tone:'warning'}},
  {name:'clear',aliases:['cls'],description:'limpa terminal',execute:()=>({output:'',actions:[{type:'clear'}]})},
@@ -31,7 +37,7 @@ export const commandRegistry:OrpheusCommand[]=[
  {name:'about',description:'informações do ORPHEUS',execute:()=>({output:'ORPHEUS INTELLIGENCE SYSTEM\nCIPHER ACCESS NODE\nCOMPANION EXPERIENCE'})},
  {name:'privacy',description:'política local de privacidade',execute:()=>({output:'OPENING LOCAL PRIVACY POLICY...',actions:[{type:'navigate',destination:'Privacidade'}]})},
  {name:'dork',description:'abre Deep Dorks',execute:(args)=>({output:'OPENING DEEP DORKS MODULE...',actions:[{type:'osint',action:'prepare',query:args.join(' '),mode:'dork'}]})},
- {name:'trace',description:'módulo futuro',execute:()=>({output:'MODULE NOT AVAILABLE IN CURRENT BUILD.',tone:'warning'})},
+ {name:'trace',description:'destaca relações conhecidas no grafo',execute:(args)=>({output:`TRACE RELATIONSHIPS${args.length?`\n\nTARGET: ${args.join(' ')}`:''}`,actions:[{type:'osint',action:'trace',query:args.join(' ')}]})},
 ]
 
 export function getPublicCommands(){return commandRegistry.filter(command=>!command.hidden)}
