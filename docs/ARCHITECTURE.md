@@ -69,3 +69,9 @@ Search history uses `orpheus-search.json`, separate from `orpheus-state.json`. P
 `SearchSession` flows through conservative entity extraction, evidence, deterministic confidence scoring, explainable relationships, timeline, bounded graph, operator review and reports. Investigation data uses the separate versioned `orpheus-investigations.json`, capped at 10 investigations, 500 entities and 1,000 relationships. Private sessions bypass persistence.
 
 This bounded volume does not yet justify SQLite; the storage adapter remains the migration boundary. The graph is native SVG. Exact typed values may merge, but name similarity never merges people automatically. DNS enrichment runs through Hickory Resolver in the Rust backend after domain validation, without an operating-system shell.
+
+## Phase 7 — Founders Licensing
+
+Application access is gated before the narrative sequence. `LicenseProvider` separates production signature verification from the DEV-only provider. The Rust backend verifies Ed25519 envelopes; `useLicense` hydrates the isolated `orpheus-license.json` store, revalidates on startup and exposes typed capabilities. MASTER controls require both a verified MASTER identity and the relevant capability.
+
+See [LICENSE_PROTOCOL.md](LICENSE_PROTOCOL.md) for the public protocol. Private issuance material is never part of the application repository or installer.

@@ -21,6 +21,11 @@ exports/
 *.db-wal
 investigations/
 reports/
+PRIVATE/
+licenses-private/
+*.private-key
+*.license-secret
+orpheus-license.json
 
 backups/
 *.msi

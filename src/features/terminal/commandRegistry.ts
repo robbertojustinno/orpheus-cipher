@@ -1,6 +1,7 @@
 import { formatFounderAccess } from '../../config/system'
 import type { EnigmaStatus } from '../../types'
 import type { CommandContext, OrpheusCommand } from './commandTypes'
+import { formatLicenseAccess, hasCapability } from '../license/types/license'
 
 const line=(label:string,value:string)=>`${label.padEnd(20,'.')} ${value}`
 const missionActive=(context:CommandContext)=>context.progress.missionStarted
@@ -32,6 +33,8 @@ export const commandRegistry:OrpheusCommand[]=[
  {name:'evidence',description:'lista evidências rastreáveis',execute:()=>({output:'OPENING EVIDENCE INDEX...',actions:[{type:'osint',action:'evidence'}]})},
  {name:'report',description:'gera relatório OSINT preliminar',execute:()=>({output:'PRELIMINARY REPORT PREPARED.',actions:[{type:'osint',action:'report'}]})},
  {name:'export',description:'exporta investigação em JSON ou CSV',execute:(args)=>args[0]==='json'||args[0]==='csv'?{output:`EXPORT ${args[0].toUpperCase()} PREPARED.`,actions:[{type:'osint',action:'export',format:args[0]}]}:{output:'USAGE\n\nexport json\nexport csv',tone:'warning'}},
+ {name:'license',description:'status da licença local',execute:(_,context)=>{const license=context.license;if(!license)return{output:'LICENSE STATUS\n\nNODE NOT AUTHORIZED.',tone:'danger'};return{output:`LICENSE STATUS\n\n${line('TYPE',license.type)}\n${line('ACCESS',formatLicenseAccess(license))}\n${line('STATUS',license.status.toUpperCase())}\n${line('NODE',license.type==='MASTER'?'DEVELOPMENT AUTHORIZED':'AUTHORIZED')}`,actions:[{type:'navigate',destination:'License Status'}]}}},
+ {name:'master',description:'ferramentas administrativas autorizadas',execute:(_,context)=>context.license?.type==='MASTER'&&hasCapability(context.license,'developer-tools')?{output:'CIPHER // MASTER ACCESS\n\nDEVELOPMENT AUTHORIZED.',actions:[{type:'navigate',destination:'License Status'}]}:{output:'ACCESS DENIED\n\nMASTER CAPABILITY REQUIRED.',tone:'danger'}},
  {name:'clear',aliases:['cls'],description:'limpa terminal',execute:()=>({output:'',actions:[{type:'clear'}]})},
  {name:'history',description:'histórico de comandos',execute:(_,context)=>({output:`COMMAND HISTORY\n\n${context.history.length?context.history.map((item,index)=>`${String(index+1).padStart(2,'0')}  ${item}`).join('\n'):'NO COMMANDS IN CURRENT SESSION.'}`})},
  {name:'about',description:'informações do ORPHEUS',execute:()=>({output:'ORPHEUS INTELLIGENCE SYSTEM\nCIPHER ACCESS NODE\nCOMPANION EXPERIENCE'})},

@@ -6,7 +6,7 @@
 - Phase 4 — Enigma Engine
 - Phase 5 — Deep Search
 - Phase 6 — Advanced Correlation & Investigation Graph
-- Phase 7 — Founders Licensing
+- Phase 7 — Founders Licensing & Controlled Activation
 - Phase 8 — Narrative Expansion
 - Phase 9 — Production Release
 

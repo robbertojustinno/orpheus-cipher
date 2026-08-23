@@ -8,7 +8,11 @@ import { RightWidget } from './components/RightWidget'
 import { Sidebar } from './components/Sidebar'
 import { StatusBar } from './components/StatusBar'
 import { TopBar } from './components/TopBar'
-import { formatFounderAccess } from './config/system'
+import { LicenseGate } from './features/license/components/LicenseGate'
+import { LicenseStatusPanel } from './features/license/components/LicenseStatusPanel'
+import { useLicense } from './features/license/hooks/useLicense'
+import { hasCapability } from './features/license/types/license'
+import { resetMasterScope } from './features/license/services/masterResetService'
 import { EnigmaModal } from './features/enigmas/EnigmaModal'
 import { DetectionSequence } from './features/narrative/DetectionSequence'
 import { PrivacyPanel } from './features/operator/PrivacyPanel'
@@ -33,7 +37,10 @@ function App(){
   const[osintRequest,setOsintRequest]=useState<OsintRequest>({nonce:0})
   const[dossierSubject,setDossierSubject]=useState('')
   const[highlightObjective,setHighlightObjective]=useState(false)
+  const licenseState=useLicense()
   const{hydration,progress,logs,enigmas,setLogs,addTerminalLog,setNarrativeState,startMission,openEnigma,submitEnigmaAnswer,unlockHint,devSetEnigma,resetNarrative,recordAudit}=useNarrativeStore()
+
+  if(licenseState.hydration==='loading'||!licenseState.license)return <LicenseGate hydration={licenseState.hydration} installationId={licenseState.installationId} validationCode={licenseState.validationCode} onActivate={licenseState.activate}/>
 
   const notify=(message:string)=>{setToast(message);window.setTimeout(()=>setToast(''),2800)}
   const handleEnigma=(enigma:Enigma)=>{
@@ -54,20 +61,20 @@ function App(){
     if(action.type==='osint'){setOsintRequest({nonce:Date.now(),query:action.query,mode:action.mode,action:action.action,format:action.format});setActive(action.mode==='dork'?'Deep Dorks':'Pesquisa Profunda');return}
   }
   const overall=calculateOverallProgress(enigmaDefinitions,progress)
-  const dashboard=!['Privacidade','Pesquisa Profunda','Dossiê','Deep Dorks'].includes(active)
+  const dashboard=!['Privacidade','Pesquisa Profunda','Dossiê','Deep Dorks','License Status'].includes(active)
   const identityVisible=progress.narrativeState==='DETECTED'||progress.narrativeState==='MISSION_ACTIVE'
   const displayIdentity=identityVisible?progress.operator:{...anonymousIdentity,platform:progress.operator.platform,arch:progress.operator.arch}
 
   return <div className={`${styles.app} ${interference?styles.interference:''}`}>
     {hydration==='ready'&&<DetectionSequence state={progress.narrativeState} firstDetectionCompleted={progress.firstDetectionCompleted} identity={progress.operator} setState={setNarrativeState} addLog={addTerminalLog} setInterference={setInterference}/>}
-    <TopBar onMenu={()=>setMenu(true)} identity={displayIdentity} founderAccess={formatFounderAccess(progress.founderId,progress.founderTotal)}/>
+    <TopBar onMenu={()=>setMenu(true)} identity={displayIdentity} license={licenseState.license}/>
     <Sidebar active={active} open={menu} onClose={()=>setMenu(false)} onNavigate={label=>{setActive(label);if(!['Painel','Privacidade','Pesquisa Profunda','Deep Dorks'].includes(label))notify(`${label.toUpperCase()} // Módulo em preparação`)}}/>
     {menu&&<button className={styles.overlay} onClick={()=>setMenu(false)} aria-label="Fechar menu"/>}
     <main className={styles.main}>
       <div className={styles.breadcrumb}>
         <span>ORPHEUS</span><i>/</i><strong>{active.toUpperCase()}</strong>
         <small>CIPHER NODE // {identityVisible?progress.operator.username:'SESSION-UNBOUND'}</small>
-        {import.meta.env.DEV&&<button className={styles.devReset} onClick={async()=>{await resetNarrative();location.reload()}}>RESET NARRATIVE STATE</button>}
+        {hasCapability(licenseState.license,'master-reset')&&<button className={styles.devReset} onClick={async()=>{await resetNarrative();location.reload()}}>RESET NARRATIVE STATE</button>}
       </div>
       {dashboard?<div className={styles.layout}>
         <div className={styles.primary}>
@@ -79,7 +86,7 @@ function App(){
             </header>
             <div className={styles.enigmaGrid}>{enigmas.map(enigma=><EnigmaCard key={enigma.id} enigma={enigma} onAction={handleEnigma}/>)}</div>
           </section>
-          <ActivityTerminal logs={logs} setLogs={setLogs} progress={progress} enigmas={enigmas} onAction={handleTerminalAction} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>
+          <ActivityTerminal logs={logs} setLogs={setLogs} progress={progress} enigmas={enigmas} license={licenseState.license} onAction={handleTerminalAction} onAudit={(type,resource)=>{void recordAudit(type,resource)}}/>
         </div>
         <aside className={styles.right}>
           <RightWidget title="OBJETIVO ATUAL" code="OBJ.01" className={highlightObjective?styles.objectiveHighlight:''}>
@@ -92,7 +99,7 @@ function App(){
           </RightWidget>
           <RightWidget title="MAPA DE CONEXÕES" code="NET.08"><ConnectionMap operatorName={displayIdentity.username}/></RightWidget>
         </aside>
-      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='Pesquisa Profunda'?<DeepSearchPanel initialQuery={searchQuery} request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:active==='Deep Dorks'?<DeepSearchPanel initialQuery={searchQuery} initialMode="dork" request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:<ModulePanel module="dossier" subject={dossierSubject}/>}
+      </div>:active==='Privacidade'?<PrivacyPanel/>:active==='License Status'?<LicenseStatusPanel state={licenseState.state!} installationId={licenseState.installationId} graceRemainingDays={licenseState.graceRemainingDays} onMasterReset={async action=>{if(action==='narrative')await resetNarrative();else if(action==='license')await licenseState.reset();else await resetMasterScope(action);location.reload()}}/>:active==='Pesquisa Profunda'?<DeepSearchPanel initialQuery={searchQuery} request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:active==='Deep Dorks'?<DeepSearchPanel initialQuery={searchQuery} initialMode="dork" request={osintRequest} onAudit={(type,resource)=>{void recordAudit(type,resource)}} onInvestigationAudit={(type,resource)=>{void recordAudit(type,resource)}}/>:<ModulePanel module="dossier" subject={dossierSubject}/>}
     </main>
     <StatusBar/>
     {selected&&(()=>{const current=enigmas.find(item=>item.id===selected.id)??selected;return <EnigmaModal enigma={current} onClose={()=>setSelected(null)} onSubmit={answer=>submitEnigmaAnswer(current.id,answer)} onHint={()=>unlockHint(current.id)} onDevAction={import.meta.env.DEV?action=>{void devSetEnigma(current.id,action)}:undefined}/>})()}

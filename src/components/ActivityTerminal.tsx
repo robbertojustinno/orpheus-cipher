@@ -4,12 +4,13 @@ import type { TerminalAction } from '../features/terminal/commandTypes'
 import { useTerminalController } from '../features/terminal/useTerminalController'
 import { Icon } from './Icon'
 import styles from './ActivityTerminal.module.css'
+import type { LicenseIdentity } from '../features/license/types/license'
 
-interface Props{logs:TerminalLog[];setLogs:Dispatch<SetStateAction<TerminalLog[]>>;progress:NarrativeProgress;enigmas:Enigma[];onAction:(action:TerminalAction)=>void;onAudit:(type:AuditEventType,resource?:string)=>void}
+interface Props{logs:TerminalLog[];setLogs:Dispatch<SetStateAction<TerminalLog[]>>;progress:NarrativeProgress;enigmas:Enigma[];license?:LicenseIdentity;onAction:(action:TerminalAction)=>void;onAudit:(type:AuditEventType,resource?:string)=>void}
 
-export function ActivityTerminal({logs,setLogs,progress,enigmas,onAction,onAudit}:Props){
+export function ActivityTerminal({logs,setLogs,progress,enigmas,license,onAction,onAudit}:Props){
  const inputRef=useRef<HTMLInputElement>(null);const scrollRef=useRef<HTMLDivElement>(null)
- const controller=useTerminalController({progress,enigmas,setLogs,onAction,onAudit})
+ const controller=useTerminalController({progress,enigmas,license,setLogs,onAction,onAudit})
  useEffect(()=>{scrollRef.current?.scrollTo({top:scrollRef.current.scrollHeight,behavior:'smooth'})},[logs])
  const prompt=`ORPHEUS://CIPHER/${progress.operator.username.toUpperCase()} >`
  return <section className={styles.terminal} onClick={()=>inputRef.current?.focus()}>

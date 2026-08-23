@@ -41,8 +41,8 @@ npm run tauri:build
 
 Artefatos:
 
-- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.6.0_x64-setup.exe`
-- `src-tauri/target/release/bundle/msi/ORPHEUS_0.6.0_x64_en-US.msi`
+- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.7.0_x64-setup.exe`
+- `src-tauri/target/release/bundle/msi/ORPHEUS_0.7.0_x64_en-US.msi`
 
 ## Testes
 
@@ -80,6 +80,12 @@ O provider RDAP consulta informações públicas de domínio sem chave. Adapters
 Resultados públicos podem ser estruturados em entidades, evidências, relações explicáveis, timeline e grafo. O score determinístico expõe seus sinais e não apresenta correlação como identidade comprovada. Revisões do operador preservam a evidência original e hipóteses são rotuladas como `OPERATOR HYPOTHESIS`.
 
 DNS público é enriquecido no backend Rust sem shell. Investigações usam `orpheus-investigations.json`; modo privado fica somente em memória. Exports incluem JSON, CSV separados e relatório HTML offline.
+
+## Phase 7 — Founders Licensing
+
+O acesso completo é precedido por autorização de licença assinada Ed25519. Founders possuem números imutáveis entre `01/30` e `30/30`; MASTER é uma identidade técnica independente e protegida por capabilities. O aplicativo armazena somente o token assinado verificado em `orpheus-license.json` e um installation ID aleatório, sem fingerprint invasivo.
+
+O protocolo público está em [License Protocol](docs/LICENSE_PROTOCOL.md). Chaves privadas e licenças reais não pertencem a este repositório.
 
 Detalhes adicionais:
 

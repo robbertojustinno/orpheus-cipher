@@ -1,4 +1,5 @@
 import type { Enigma, NarrativeProgress, TerminalLogType } from '../../types'
+import type { LicenseIdentity } from '../license/types/license'
 
 export interface ParsedCommand { command:string; args:string[]; rawInput:string }
 export type TerminalAction =
@@ -13,7 +14,7 @@ export type TerminalAction =
   | {type:'osint';action:'prepare'|'run'|'correlate'|'report'|'export'|'investigation'|'entities'|'relationships'|'timeline'|'graph'|'evidence'|'trace';query?:string;mode?:'quick'|'deep'|'dork';format?:'json'|'csv'}
 
 export interface CommandResult { output:string; tone?:TerminalLogType; delayMs?:number; pendingText?:string; actions?:TerminalAction[]; sensitive?:boolean }
-export interface CommandContext { progress:NarrativeProgress; enigmas:Enigma[]; history:string[] }
+export interface CommandContext { progress:NarrativeProgress; enigmas:Enigma[]; history:string[]; license?:LicenseIdentity }
 export type CommandHandler=(args:string[],context:CommandContext)=>CommandResult
 
 export interface OrpheusCommand {

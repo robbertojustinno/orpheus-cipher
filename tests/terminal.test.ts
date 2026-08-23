@@ -45,6 +45,11 @@ describe('Phase 6 investigation commands',()=>{
  it.each([['entities','entities'],['relationships','relationships'],['links','relationships'],['timeline','timeline'],['graph','graph'],['evidence','evidence'],['investigation','investigation'],['trace example.com','trace']])('%s routes only to the internal workspace',(input,action)=>expect(executeCommand(input,context()).actions).toContainEqual(expect.objectContaining({type:'osint',action})))
 })
 
+describe('Phase 7 license commands',()=>{
+ it('license reports signed identity from context',()=>{const value=context();value.license={licenseId:'LIC-F07',type:'FOUNDER',founderNumber:7,issuedAt:'2026-08-23',status:'active',capabilities:['orpheus-core'],keyId:'test',maxActivations:2,offlineGraceDays:30};expect(executeCommand('license',value).output).toContain('07/30')})
+ it('master requires type and capability, not command knowledge',()=>{const founder=context();founder.license={licenseId:'LIC-F01',type:'FOUNDER',founderNumber:1,issuedAt:'2026-08-23',status:'active',capabilities:['orpheus-core'],keyId:'test',maxActivations:2,offlineGraceDays:30};expect(executeCommand('master',founder).output).toContain('ACCESS DENIED');const master=context();master.license={...founder.license,type:'MASTER',founderNumber:undefined,capabilities:['developer-tools']};expect(executeCommand('master',master).actions).toContainEqual({type:'navigate',destination:'License Status'})})
+})
+
 describe('segurança do terminal',()=>{
  it.each(['powershell Get-ChildItem','cmd.exe /c dir','cmd /c dir','bash -c ls','sh -c ls','curl https://example.com','wget https://example.com'])('%s permanece dentro do parser',input=>{const result=executeCommand(input,context());expect(result.output).toContain('COMMAND NOT RECOGNIZED');expect(result.actions).toBeUndefined()})
 })

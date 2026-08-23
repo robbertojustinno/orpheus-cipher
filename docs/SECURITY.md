@@ -50,3 +50,13 @@ The Tauri opener capability is scoped to HTTP/HTTPS. Results are not loaded insi
 - Confidence is deterministic, evidence-backed and explicitly non-conclusive.
 - DNS accepts validated domain names only and queries public A, AAAA, MX, NS, CNAME and TXT records through an in-process Rust resolver.
 - No `nslookup`, `dig`, PowerShell, CMD, process spawning or arbitrary network argument is used.
+
+## License trust boundary
+
+- Ed25519 verification occurs in Rust using a public key only.
+- The issuer private key and real activation tokens are absent from source, Git history and installers.
+- Signed fields include type, Founder number, status and capabilities; tampering fails verification.
+- MASTER UI and reset actions require signed MASTER type plus explicit capabilities.
+- The installation ID is a random local UUID, not a hardware fingerprint.
+- The DEV provider is selected only through `import.meta.env.DEV`; production builds are scanned to ensure its credential string is absent.
+- Editing `orpheus-license.json` cannot manufacture a valid signed token.

@@ -6,6 +6,7 @@ import { parseCommand } from './commandParser'
 import { appendHistory, historyAt, redactSensitiveCommand } from './terminalHistory'
 import type { TerminalAction } from './commandTypes'
 import { playSoundCue } from '../../services/soundService'
+import type { LicenseIdentity } from '../license/types/license'
 
 const clock=()=>new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
 const entry=(message:string,kind:TerminalLog['kind']='output',type:TerminalLog['type']='info'):TerminalLog=>({id:crypto.randomUUID(),timestamp:clock(),source:kind==='command'?'CIPHER':'ORPHEUS',type,message,kind})
@@ -14,12 +15,13 @@ const pause=(milliseconds:number)=>new Promise(resolve=>window.setTimeout(resolv
 interface Options{
  progress:NarrativeProgress
  enigmas:Enigma[]
+ license?:LicenseIdentity
  setLogs:Dispatch<SetStateAction<TerminalLog[]>>
  onAction:(action:TerminalAction)=>void|Promise<void>
  onAudit:(type:AuditEventType,resource?:string)=>void
 }
 
-export function useTerminalController({progress,enigmas,setLogs,onAction,onAudit}:Options){
+export function useTerminalController({progress,enigmas,license,setLogs,onAction,onAudit}:Options){
  const[input,setInput]=useState('')
  const[history,setHistory]=useState<string[]>([])
  const[historyIndex,setHistoryIndex]=useState(-1)
@@ -34,7 +36,7 @@ export function useTerminalController({progress,enigmas,setLogs,onAction,onAudit
   setLogs(current=>[...current,entry(masked,'command','cipher')])
   const parsed=parseCommand(raw);const registered=findCommand(parsed.command)
   onAudit('COMMAND_EXECUTED',registered?.name??'unrecognized')
-  const result=executeCommand(raw,{progress,enigmas,history:nextHistory})
+  const result=executeCommand(raw,{progress,enigmas,history:nextHistory,license})
   if(result.tone==='danger'||result.tone==='warning')playSoundCue('alert')
   const pendingText=result.pendingText
   if(pendingText){setLogs(current=>[...current,entry(pendingText,'output','system')]);await pause(Math.min(900,Math.max(150,result.delayMs??150)))}
@@ -43,7 +45,7 @@ export function useTerminalController({progress,enigmas,setLogs,onAction,onAudit
   else if(result.output)setLogs(current=>[...current,entry(result.output,'output',result.tone??'info')])
   for(const action of result.actions?.filter(action=>action.type!=='clear')??[])await onAction(action)
   setBusy(false)
- },[input,busy,history,setLogs,progress,enigmas,onAction,onAudit])
+ },[input,busy,history,setLogs,progress,enigmas,license,onAction,onAudit])
 
  const onKeyDown=useCallback((event:KeyboardEvent<HTMLInputElement>)=>{
   if(event.key==='Enter'){event.preventDefault();void submit();return}
