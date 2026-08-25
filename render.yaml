@@ -1,0 +1,38 @@
+databases:
+  - name: cipher-rewards-db
+    plan: basic-256mb
+    databaseName: cipher_rewards
+    user: cipher_rewards
+services:
+  - type: web
+    name: cipher-reward-api
+    runtime: node
+    rootDir: reward-api
+    plan: starter
+    buildCommand: npm ci
+    preDeployCommand: npm run migrate
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cipher-rewards-db
+          property: connectionString
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ORPHEUS_ALLOWED_ORIGINS
+        sync: false
+      - key: ADMIN_BASE_URL
+        sync: false

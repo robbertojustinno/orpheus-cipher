@@ -1,0 +1,17 @@
+{
+    "name":  "cipher-reward-api",
+    "version":  "1.0.0",
+    "private":  true,
+    "type":  "module",
+    "scripts":  {
+                    "start":  "node src/server.mjs",
+                    "migrate":  "node src/migrate.mjs",
+                    "test":  "node --test test/*.node.mjs"
+                },
+    "engines":  {
+                    "node":  "\u003e=20"
+                },
+    "dependencies":  {
+                         "pg":  "^8.16.3"
+                     }
+}

@@ -1,0 +1,4 @@
+import{createPublicKey,verify as verifySignature}from'node:crypto'
+const publicKey='brK0nUXFPiSlwzieGtJHeftNWzpl1x3Df-awzpwdOXs'
+export function verifyLicenseToken(token){const parts=String(token||'').split('.');if(parts.length!==3||parts[0]!=='ORPHEUS1')return null;try{const payload=Buffer.from(parts[1],'base64url'),signature=Buffer.from(parts[2],'base64url'),raw=Buffer.from(publicKey,'base64url'),key=createPublicKey({key:Buffer.concat([Buffer.from('302a300506032b6570032100','hex'),raw]),format:'der',type:'spki'});if(!verifySignature(null,payload,key,signature))return null;const value=JSON.parse(payload.toString('utf8'));return value.status==='active'&&typeof value.licenseId==='string'?value:null}catch{return null}}
+export const licenseLabel=l=>l.type==='FOUNDER'&&l.founderNumber?`Founder ${String(l.founderNumber).padStart(2,'0')}/30`:l.type==='MASTER'?'MASTER ACCESS':'STANDARD ACCESS'

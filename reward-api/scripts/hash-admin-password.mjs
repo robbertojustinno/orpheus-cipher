@@ -1,0 +1,1 @@
+import{randomBytes,scryptSync}from'node:crypto';const password=process.env.ADMIN_PASSWORD;if(!password)throw new Error('ADMIN_PASSWORD is required');const salt=randomBytes(16),hash=scryptSync(password,salt,64);process.stdout.write(`scrypt$${salt.toString('hex')}$${hash.toString('hex')}\n`)

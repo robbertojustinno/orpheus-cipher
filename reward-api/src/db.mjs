@@ -1,0 +1,18 @@
+import pg from'pg'
+const{Pool}=pg
+export class RewardRepository{
+ constructor(config){this.pool=new Pool({connectionString:config.databaseUrl,ssl:config.ssl?{rejectUnauthorized:false}:false})}
+ async health(){await this.pool.query('SELECT 1')}
+ async close(){await this.pool.end()}
+ async findByLicense(licenseId){return(await this.pool.query('SELECT * FROM reward_claims WHERE license_id=$1',[licenseId])).rows[0]||null}
+ async createClaim(value){const client=await this.pool.connect();try{await client.query('BEGIN');const keys=['id','license_id','completion_id','idempotency_key','verification_code','display_name','email','license_type','founder_number','license_label','completed_at','claimed_at','reward_type','full_name','address','address_number','address_complement','postal_code','city','state','country','phone','physical_consent','notification_status'];const params=keys.map(k=>value[k]??null),sql=`INSERT INTO reward_claims(${keys.join(',')}) VALUES(${keys.map((_,i)=>'$'+(i+1)).join(',')}) ON CONFLICT DO NOTHING RETURNING *`;let row=(await client.query(sql,params)).rows[0];if(!row)row=(await client.query('SELECT * FROM reward_claims WHERE license_id=$1 OR idempotency_key=$2',[value.license_id,value.idempotency_key])).rows[0];if(!row){await client.query('ROLLBACK');const error=new Error('UNIQUE_CODE_COLLISION');error.code='UNIQUE_CODE_COLLISION';throw error}await client.query('COMMIT');return row}catch(error){try{await client.query('ROLLBACK')}catch{}throw error}finally{client.release()}}
+ async markNotification(id,status){await this.pool.query('UPDATE reward_claims SET notification_status=$2,notification_attempted_at=NOW(),updated_at=NOW() WHERE id=$1',[id,status])}
+ async list({status,type,search}){const values=[],where=[];if(status){values.push(status);where.push(`status=$${values.length}`)}if(type){values.push(type);where.push(`license_type=$${values.length}`)}if(search){values.push(`%${search}%`);where.push(`(verification_code ILIKE $${values.length} OR display_name ILIKE $${values.length})`)}return(await this.pool.query(`SELECT id,verification_code,display_name,license_label,license_type,founder_number,reward_type,claimed_at,status,shipping_status FROM reward_claims ${where.length?'WHERE '+where.join(' AND '):''} ORDER BY claimed_at DESC LIMIT 500`,values)).rows}
+ async detail(id){return(await this.pool.query('SELECT * FROM reward_claims WHERE id=$1',[id])).rows[0]||null}
+ async status(id,status){return(await this.pool.query(`UPDATE reward_claims SET status=$2,shipping_status=$2,shipped_at=CASE WHEN $2='SHIPPED' THEN COALESCE(shipped_at,NOW()) ELSE shipped_at END,delivered_at=CASE WHEN $2='DELIVERED' THEN COALESCE(delivered_at,NOW()) ELSE delivered_at END,updated_at=NOW() WHERE id=$1 RETURNING *`,[id,status])).rows[0]||null}
+ async shipping(id,{carrier,trackingCode,adminNotes}){return(await this.pool.query('UPDATE reward_claims SET carrier=$2,tracking_code=$3,admin_notes=$4,updated_at=NOW() WHERE id=$1 RETURNING *',[id,carrier||null,trackingCode||null,adminNotes||null])).rows[0]||null}
+ async createSession(hash,username,expiresAt){await this.pool.query('INSERT INTO admin_sessions(id_hash,username,expires_at) VALUES($1,$2,$3)',[hash,username,expiresAt])}
+ async session(hash){return(await this.pool.query('SELECT username FROM admin_sessions WHERE id_hash=$1 AND expires_at>NOW()',[hash])).rows[0]||null}
+ async deleteSession(hash){await this.pool.query('DELETE FROM admin_sessions WHERE id_hash=$1',[hash])}
+}
+export const publicClaim=row=>row?{verificationCode:row.verification_code,displayName:row.display_name,licenseLabel:row.license_label,completedAt:row.completed_at,claimedAt:row.claimed_at,rewardType:row.reward_type,rewardEditCount:row.reward_edit_count}:undefined
