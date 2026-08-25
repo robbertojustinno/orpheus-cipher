@@ -1,5 +1,6 @@
 import{createServer}from'node:http'
 import{createHash,randomBytes,randomUUID}from'node:crypto'
+import{pathToFileURL}from'node:url'
 import{config as loadConfig}from'./config.mjs'
 import{RewardRepository,publicClaim}from'./db.mjs'
 import{verifyLicenseToken,licenseLabel}from'./license.mjs'
@@ -46,4 +47,5 @@ export function createRewardServer({cfg=loadConfig(),repo=new RewardRepository(c
    return json(r,s,404,{code:'NOT_FOUND'})
   }catch(error){const status=error.status||400;console.error(`[API] path=${url.pathname} error=${error?.message||'UNKNOWN'}`);return json(r,s,status,{code:status===413?'PAYLOAD_TOO_LARGE':'INVALID_REQUEST'})}})
 }
-if(import.meta.url===`file:///${process.argv[1]?.replaceAll('\\','/')}`){const cfg=loadConfig(),server=createRewardServer({cfg});server.listen(cfg.port,'0.0.0.0',()=>console.log(`CIPHER Reward API listening on port ${cfg.port}`))}
+export const isMainModule=(moduleUrl,entryPath)=>Boolean(entryPath&&moduleUrl===pathToFileURL(entryPath).href)
+if(isMainModule(import.meta.url,process.argv[1])){const cfg=loadConfig(),server=createRewardServer({cfg});server.listen(cfg.port,'0.0.0.0',()=>console.log(`CIPHER Reward API listening on port ${cfg.port}`))}
