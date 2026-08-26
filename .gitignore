@@ -30,3 +30,8 @@ orpheus-license.json
 backups/
 *.msi
 *-setup.exe
+!.env.example
+# Canonical Narrative data must only exist in the private Render secret-file store.
+narrative-api/private/
+narrative-api/*.canonical.json
+narrative-api/*.secret.json

@@ -36,3 +36,20 @@ services:
         sync: false
       - key: ADMIN_BASE_URL
         sync: false
+  - type: web
+    name: cipher-narrative-api
+    runtime: node
+    rootDir: narrative-api
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ORPHEUS_NARRATIVE_ALLOWED_ORIGINS
+        value: http://tauri.localhost,https://tauri.localhost
+      - key: ORPHEUS_CANONICAL_ENIGMAS_FILE
+        sync: false
+      - key: ORPHEUS_SECRET_CAMPAIGN_FILE
+        sync: false
