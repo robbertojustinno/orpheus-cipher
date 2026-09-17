@@ -1,31 +1,31 @@
 {
-  "name": "orpheus-interface",
-  "private": true,
-  "version": "0.7.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit -p tsconfig.app.json && vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.8.0",
-    "@tauri-apps/plugin-opener": "^2.5.4",
-    "@tauri-apps/plugin-store": "^2.4.1",
-    "@vitejs/plugin-react": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "typescript": "latest",
-    "vite": "latest"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.11.4",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "vitest": "^3.2.4"
-  }
+    "name":  "orpheus-interface",
+    "private":  true,
+    "version":  "1.0.12",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "tsc --noEmit -p tsconfig.app.json \u0026\u0026 vite build",
+                    "preview":  "vite preview",
+                    "test":  "vitest run",
+                    "tauri":  "tauri",
+                    "tauri:dev":  "tauri dev",
+                    "tauri:build":  "tauri build"
+                },
+    "dependencies":  {
+                         "@tauri-apps/api":  "^2.8.0",
+                         "@tauri-apps/plugin-opener":  "^2.5.4",
+                         "@tauri-apps/plugin-store":  "^2.4.1",
+                         "@vitejs/plugin-react":  "latest",
+                         "react":  "latest",
+                         "react-dom":  "latest",
+                         "typescript":  "latest",
+                         "vite":  "latest"
+                     },
+    "devDependencies":  {
+                            "@tauri-apps/cli":  "^2.11.4",
+                            "@types/react":  "latest",
+                            "@types/react-dom":  "latest",
+                            "vitest":  "^3.2.4"
+                        }
 }

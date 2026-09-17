@@ -11,6 +11,7 @@ export type TerminalAction =
   | {type:'open-dossier';subject:string}
   | {type:'request-hint';enigmaId:string}
   | {type:'submit-answer';enigmaId:string;answer:string}
+  | {type:'validate-secret';rawInput:string}
   | {type:'osint';action:'prepare'|'run'|'correlate'|'report'|'export'|'investigation'|'entities'|'relationships'|'timeline'|'graph'|'evidence'|'trace';query?:string;mode?:'quick'|'deep'|'dork';format?:'json'|'csv'}
 
 export interface CommandResult { output:string; tone?:TerminalLogType; delayMs?:number; pendingText?:string; actions?:TerminalAction[]; sensitive?:boolean }

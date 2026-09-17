@@ -1,0 +1,38 @@
+ORPHEUS / CIPHER — HOTFIX SOBRE RC12
+
+Correções aplicadas diretamente ao código enviado:
+
+1. Fluxo FINAL KEY ACCEPTED restaurado
+   - RC12 tinha showCompletion, mas não havia mais nenhum setShowCompletion(true).
+   - Agora o painel final abre somente quando campaignCompleted muda de false para true na sessão atual.
+   - Reabrir enigmas resolvidos depois não dispara o fluxo final novamente.
+
+2. Distintivo restaurado como acesso explícito
+   - Após campaignCompleted, o menu passa a mostrar "Distintivo".
+   - A rota Distintivo força a consulta/restauração do claim remoto.
+   - Enquanto sincroniza, mostra estado controlado e permite voltar.
+   - Se o reward estiver indisponível, mostra erro controlado e permite voltar.
+   - O botão flutuante VER DISTINTIVO no Painel foi preservado.
+
+3. Fluxo de reward preservado
+   - ARQUIVAR no CompletionPanel continua abrindo o canal de reward.
+   - Não foi alterada lógica de claim, token, endpoint, Render ou backend.
+
+4. Relatório Final corrigido
+   - A tela agora realmente oferece EXPORTAR RELATÓRIO e CARTÃO SEM SPOILERS quando 12/12 estão concluídos.
+
+5. Teste de regressão adicionado
+   - tests/rc12HotfixNavigation.test.tsx
+
+Arquivos alterados:
+- src/App.tsx
+- src/components/Sidebar.tsx
+- src/features/reward/SecretReward.tsx
+- src/features/modules/OperationalPanel.tsx
+- src/features/modules/ModulePanel.module.css
+- tests/rc12HotfixNavigation.test.tsx
+
+Validação executada neste ambiente:
+- Parsing/sintaxe TypeScript/TSX dos arquivos alterados: PASS.
+- Não foi possível executar a suíte Vitest completa porque as dependências npm não estavam totalmente disponíveis no ambiente isolado.
+- Nenhum arquivo PRIVATE, token, chave, .env de produção ou backend foi incluído no hotfix.

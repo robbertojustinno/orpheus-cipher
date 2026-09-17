@@ -1,0 +1,30 @@
+ORPHEUS / CIPHER — HOTFIX RC13
+
+Escopo:
+1. ARQUIVOS: os cards desbloqueados agora são clicáveis e abrem um registro detalhado.
+2. MENSAGENS: os cards desbloqueados agora são clicáveis e abrem uma comunicação detalhada.
+3. CONTEÚDO: o ZIP RC13 não contém corpos narrativos próprios para arquivos/mensagens. Para não inventar canon, os detalhes usam exclusivamente metadados públicos já existentes em src/data/enigmas.ts (título, canal e descrição), mais estado de progressão do sistema. Nenhuma resposta, alias ou trigger secreto é incluído.
+4. RELATÓRIO FINAL: no Tauri instalado, EXPORTAR RELATÓRIO e CARTÃO SEM SPOILERS passam a salvar via comando nativo Rust na pasta Downloads do usuário (fallback para a pasta do perfil se Downloads não existir). O painel mostra o caminho salvo ou falha controlada.
+5. WEB: fora do Tauri permanece fallback de download por Blob/anchor.
+6. SEGURANÇA: o comando nativo aceita somente nomes simples .json/.svg, bloqueia path traversal e limita conteúdo a 2 MB.
+
+Arquivos alterados/adicionados:
+- src/features/modules/OperationalPanel.tsx
+- src/features/modules/ModulePanel.module.css
+- src/features/modules/operationalContent.ts (novo)
+- src/features/narrative/operationReport.ts
+- src/features/narrative/CompletionPanel.tsx
+- src-tauri/src/lib.rs
+- tests/operationalModules.test.ts (novo)
+
+Não alterados:
+- Narrative API / Render
+- Reward API / Postgres / Resend
+- claims / MASTER / Founder
+- respostas canônicas / aliases / secret triggers
+- Caixa de Enigmas / Distintivo / dossiês
+
+Validação deste ambiente:
+- Inspeção estática da implementação: realizada.
+- npm ci neste sandbox não concluiu dentro do tempo disponível, portanto NÃO declarar testes Vitest/Tauri PASS com base neste pacote.
+- Rodar no Windows do projeto: npm test ; npm run build ; npm run tauri:build.

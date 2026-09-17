@@ -1,0 +1,25 @@
+{
+  "dashboard": true,
+  "trigger": true,
+  "badge": {
+    "visible": true,
+    "code": "CIPHER-OP-EAB6C666BC"
+  },
+  "sameCode": true,
+  "escaped": true,
+  "persistedHints": {
+    "one": true,
+    "two": true,
+    "three": true,
+    "classified": 0
+  },
+  "layout": {
+    "innerWidth": 1264,
+    "innerHeight": 681,
+    "docWidth": 1258,
+    "docHeight": 2354,
+    "horizontalOverflow": false,
+    "verticalScrollable": true
+  },
+  "consoleErrors": []
+}

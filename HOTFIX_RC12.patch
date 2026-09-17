@@ -1,0 +1,243 @@
+--- /tmp/CIPHER_RC12_ORIG/src/App.tsx	2026-08-26 15:25:41.222335177 +0000
++++ src/App.tsx	2026-08-26 15:20:06.517389008 +0000
+@@ -1,4 +1,4 @@
+-import { useState } from "react";
++import { useEffect, useRef, useState } from "react";
+ import { ActivityTerminal } from "./components/ActivityTerminal";
+ import { AlertPanel } from "./components/AlertPanel";
+ import { ConnectionMap } from "./components/ConnectionMap";
+@@ -16,9 +16,10 @@
+ import { EnigmaModal } from "./features/enigmas/EnigmaModal";
+ import { DetectionSequence } from "./features/narrative/DetectionSequence";
+ import { CompletionPanel } from "./features/narrative/CompletionPanel";
++import { exportOperationReport, exportShareCard } from "./features/narrative/operationReport";
+ import { SecretRewardGate } from "./features/reward/SecretReward";
+ import { PrivacyPanel } from "./features/operator/PrivacyPanel";
+-import { ModulePanel } from "./features/modules/ModulePanel";
++import { ModulePanel } from "./features/modules/ModulePanel";
+ import { OperationalPanel } from "./features/modules/OperationalPanel";
+ import {
+   DeepSearchPanel,
+@@ -69,6 +70,19 @@
+     recordAudit,
+     discoverSecretCommand,
+   } = useNarrativeStore(licenseState.license ?? undefined);
++  const completionObserved = useRef<boolean | null>(null);
++
++  useEffect(() => {
++    if (hydration !== "ready") return;
++    if (completionObserved.current === null) {
++      completionObserved.current = progress.campaignCompleted;
++      return;
++    }
++    if (!completionObserved.current && progress.campaignCompleted) {
++      setShowCompletion(true);
++    }
++    completionObserved.current = progress.campaignCompleted;
++  }, [hydration, progress.campaignCompleted]);
+ 
+   if (licenseState.hydration === "loading" || !licenseState.license)
+     return (
+@@ -199,7 +213,7 @@
+   const solvedCount = enigmas.filter(
+     (enigma) => enigma.status === "solved",
+   ).length;
+-  const dashboard = !["Privacidade", "Pesquisa Profunda", "Dossiê", "Deep Dorks", "License Status", "Arquivos", "Mensagens", "Missões", "Relatório Final", "Caixa de Enigmas"].includes(active);
++  const dashboard = !["Privacidade", "Pesquisa Profunda", "Dossiê", "Deep Dorks", "License Status", "Arquivos", "Mensagens", "Missões", "Relatório Final", "Caixa de Enigmas", "Distintivo"].includes(active);
+   const identityVisible =
+     progress.narrativeState === "DETECTED" ||
+     progress.narrativeState === "MISSION_ACTIVE";
+@@ -231,6 +245,7 @@
+       <Sidebar
+         active={active}
+         open={menu}
++        showBadge={progress.campaignCompleted}
+         onClose={() => setMenu(false)}
+         onNavigate={(label) => {
+           setActive(label);
+@@ -428,7 +443,22 @@
+         ) : active === "Missões" ? (
+           <OperationalPanel module="missions" solvedCount={solvedCount} unlockedFiles={progress.unlockedFiles} unlockedMessages={progress.unlockedMessages} missionActive={progress.missionStarted} onBack={() => setActive("Painel")} />
+         ) : active === "Relatório Final" ? (
+-          <OperationalPanel module="report" solvedCount={solvedCount} unlockedFiles={progress.unlockedFiles} unlockedMessages={progress.unlockedMessages} missionActive={progress.missionStarted} onBack={() => setActive("Painel")} />
++          <OperationalPanel
++            module="report"
++            solvedCount={solvedCount}
++            unlockedFiles={progress.unlockedFiles}
++            unlockedMessages={progress.unlockedMessages}
++            missionActive={progress.missionStarted}
++            onExportReport={() => exportOperationReport(progress)}
++            onExportCard={() => exportShareCard(progress)}
++            onBack={() => setActive("Painel")}
++          />
++        ) : active === "Distintivo" ? (
++          <section className={styles.panel}>
++            <h1>DISTINTIVO CIPHER</h1>
++            <p>REGISTRO DE OPERADOR // validando reconhecimento no canal seguro.</p>
++            <button onClick={() => setActive("Painel")}>VOLTAR</button>
++          </section>
+         ) : active === "Caixa de Enigmas" ? (
+           <section className={styles.panel}><h1>CAIXA DE ENIGMAS</h1><p>ÍNDICE NARRATIVO // selecione uma caixa para consultar seu conteúdo autorizado.</p><div className={styles.enigmaGrid}>{enigmas.map((enigma) => <button key={enigma.id} className={styles.enigmaIndexButton} onClick={() => handleEnigma(enigma)}><strong>{enigma.title}</strong><span>{enigma.status.toUpperCase()} // {enigma.difficulty.toUpperCase()}</span></button>)}</div><button onClick={() => setActive("Painel")}>VOLTAR</button></section>
+         ) : (
+@@ -470,6 +500,7 @@
+           progress={progress}
+           licenseState={licenseState.state}
+           showTrigger={active === "Painel"}
++          forceOpen={active === "Distintivo"}
+           openRequest={rewardOpenRequest}
+           onReturnToMain={handleReturnToMain}
+         />
+--- /tmp/CIPHER_RC12_ORIG/src/components/Sidebar.tsx	2026-08-26 15:25:41.229327334 +0000
++++ src/components/Sidebar.tsx	2026-08-26 15:20:28.908877042 +0000
+@@ -1,2 +1,64 @@
+-import {navigation} from '../data/mockData';import {Icon} from './Icon';import styles from './Sidebar.module.css'
+-export function Sidebar({active,onNavigate,open,onClose}:{active:string;onNavigate:(s:string)=>void;open:boolean;onClose:()=>void}){return <aside className={`${styles.sidebar} ${open?styles.open:''}`}><div className={styles.mobileHead}><span>ORPHEUS</span><button onClick={onClose}><Icon name="close"/></button></div><div className={styles.sectionLabel}>NAVEGAÇÃO PRINCIPAL</div><nav>{navigation.map(item=><button key={item.label} className={`${styles.item} ${active===item.label?styles.active:''}`} onClick={()=>{onNavigate(item.label);onClose()}}><Icon name={item.icon} size={17}/><span>{item.label}</span>{item.alert&&<i className={styles.alertDot}/>} {item.badge&&<b>{item.badge}</b>}</button>)}</nav><div className={styles.connection}><div><i/> CONEXÃO</div><strong>ORPHEUS NETWORK</strong><span>NÓ ATIVO: BR-SAO-09</span><em><i/><i/><i/><i/></em></div></aside>}
++import { navigation } from '../data/mockData';
++import type { NavItem } from '../types';
++import { Icon } from './Icon';
++import styles from './Sidebar.module.css';
++
++const badgeNavigation: NavItem = { label: 'Distintivo', icon: 'report' };
++
++export function Sidebar({
++  active,
++  onNavigate,
++  open,
++  onClose,
++  showBadge = false,
++}: {
++  active: string;
++  onNavigate: (s: string) => void;
++  open: boolean;
++  onClose: () => void;
++  showBadge?: boolean;
++}) {
++  const items = showBadge ? [...navigation, badgeNavigation] : navigation;
++
++  return (
++    <aside className={`${styles.sidebar} ${open ? styles.open : ''}`}>
++      <div className={styles.mobileHead}>
++        <span>ORPHEUS</span>
++        <button onClick={onClose}>
++          <Icon name="close" />
++        </button>
++      </div>
++      <div className={styles.sectionLabel}>NAVEGAÇÃO PRINCIPAL</div>
++      <nav>
++        {items.map((item) => (
++          <button
++            key={item.label}
++            className={`${styles.item} ${active === item.label ? styles.active : ''}`}
++            onClick={() => {
++              onNavigate(item.label);
++              onClose();
++            }}
++          >
++            <Icon name={item.icon} size={17} />
++            <span>{item.label}</span>
++            {item.alert && <i className={styles.alertDot} />}{' '}
++            {item.badge && <b>{item.badge}</b>}
++          </button>
++        ))}
++      </nav>
++      <div className={styles.connection}>
++        <div>
++          <i /> CONEXÃO
++        </div>
++        <strong>ORPHEUS NETWORK</strong>
++        <span>NÓ ATIVO: BR-SAO-09</span>
++        <em>
++          <i />
++          <i />
++          <i />
++          <i />
++        </em>
++      </div>
++    </aside>
++  );
++}
+--- /tmp/CIPHER_RC12_ORIG/src/features/reward/SecretReward.tsx	2026-08-26 15:25:41.237899953 +0000
++++ src/features/reward/SecretReward.tsx	2026-08-26 15:25:28.864773252 +0000
+@@ -182,6 +182,7 @@
+   progress: NarrativeProgress;
+   licenseState: PersistedLicenseState;
+   showTrigger: boolean;
++  forceOpen?: boolean;
+   openRequest: number;
+   onReturnToMain: () => void;
+ }
+@@ -190,6 +191,7 @@
+   progress,
+   licenseState,
+   showTrigger,
++  forceOpen = false,
+   openRequest,
+   onReturnToMain,
+ }: SecretRewardGateProps) {
+@@ -197,9 +199,35 @@
+   const [open, setOpen] = useState(false);
+ 
+   useEffect(() => {
+-    if (openRequest > 0 && reward.rewardUnlocked && reward.eligibility)
++    if ((openRequest > 0 || forceOpen) && reward.rewardUnlocked && reward.eligibility)
+       setOpen(true);
+-  }, [openRequest, reward.rewardUnlocked, reward.eligibility]);
++  }, [forceOpen, openRequest, reward.rewardUnlocked, reward.eligibility]);
++
++  if (forceOpen && reward.error && (!reward.rewardUnlocked || !reward.eligibility)) {
++    return (
++      <div className={styles.backdrop}>
++        <section className={styles.panel}>
++          <small>ORPHEUS // REWARD CHANNEL</small>
++          <h2>DISTINTIVO TEMPORARIAMENTE INDISPONÍVEL</h2>
++          <div className={styles.error}>{reward.error}</div>
++          <button onClick={onReturnToMain}>VOLTAR AO MENU PRINCIPAL</button>
++        </section>
++      </div>
++    );
++  }
++
++  if (forceOpen && (!reward.rewardUnlocked || !reward.eligibility)) {
++    return (
++      <div className={styles.backdrop}>
++        <section className={styles.panel}>
++          <small>ORPHEUS // REWARD CHANNEL</small>
++          <h2>VALIDANDO REGISTRO DE OPERADOR</h2>
++          <p>Sincronizando o distintivo com o canal seguro.</p>
++          <button onClick={onReturnToMain}>VOLTAR AO MENU PRINCIPAL</button>
++        </section>
++      </div>
++    );
++  }
+ 
+   if (!reward.rewardUnlocked || !reward.eligibility) return null;
+ 
+--- /tmp/CIPHER_RC12_ORIG/src/features/modules/OperationalPanel.tsx	2026-08-26 15:25:41.234137253 +0000
++++ src/features/modules/OperationalPanel.tsx	2026-08-26 15:20:11.131855098 +0000
+@@ -25,7 +25,7 @@
+   </div>;
+ }
+ 
+-export function OperationalPanel({ module, solvedCount, unlockedFiles, unlockedMessages, missionActive, onBack }: { module: OperationalModule; solvedCount: number; unlockedFiles: string[]; unlockedMessages: string[]; missionActive: boolean; onBack: () => void }) {
++export function OperationalPanel({ module, solvedCount, unlockedFiles, unlockedMessages, missionActive, onBack, onExportReport, onExportCard }: { module: OperationalModule; solvedCount: number; unlockedFiles: string[]; unlockedMessages: string[]; missionActive: boolean; onBack: () => void; onExportReport?: () => void; onExportCard?: () => void }) {
+   const title = module === "files" ? "ARQUIVOS" : module === "messages" ? "MENSAGENS" : module === "missions" ? "MISSÕES" : "RELATÓRIO FINAL";
+   const icon = module === "files" ? "archive" : module === "messages" ? "message" : module === "missions" ? "target" : "report";
+   return <section className={styles.panel} data-testid={`module-${module}`}>
+@@ -36,7 +36,7 @@
+     </>}
+     {module === "messages" && <><p>Comunicações liberadas pela progressão da operação.</p><div className={styles.dossierList}>{unlockedMessages.length ? unlockedMessages.map(message => <div className={styles.result} key={message}><strong>{message.toUpperCase()}</strong><p>CANAL CIPHER // CONTEÚDO AUTORIZADO</p></div>) : <div className={styles.result}><strong>CAIXA DE ENTRADA VAZIA</strong><p>NENHUMA MENSAGEM AUTORIZADA NESTE ESTÁGIO.</p></div>}</div></>}
+     {module === "missions" && <div className={styles.result}><strong>{missionActive ? "MISSÃO EM ANDAMENTO" : "MISSÃO EM ESPERA"}</strong><p>{missionActive ? "Recuperar a chave narrativa e identificar o padrão por trás do Protocolo Orpheus." : "A missão será disponibilizada quando a sequência narrativa for iniciada."}</p></div>}
+-    {module === "report" && <div className={styles.result}><strong>{solvedCount === 12 ? "RELATÓRIO FINAL DISPONÍVEL" : "RELATÓRIO FINAL BLOQUEADO"}</strong><p>{solvedCount === 12 ? "A operação principal foi concluída. Use o fluxo de arquivamento para exportar o relatório." : `PROGRESSÃO INCOMPLETA // ${solvedCount}/12 enigmas restaurados.`}</p></div>}
++    {module === "report" && <div className={styles.result}><strong>{solvedCount === 12 ? "RELATÓRIO FINAL DISPONÍVEL" : "RELATÓRIO FINAL BLOQUEADO"}</strong><p>{solvedCount === 12 ? "A operação principal foi concluída. Exporte o relatório operacional ou o cartão sem spoilers." : `PROGRESSÃO INCOMPLETA // ${solvedCount}/12 enigmas restaurados.`}</p>{solvedCount === 12 && <div className={styles.reportActions}>{onExportReport && <button onClick={onExportReport}>EXPORTAR RELATÓRIO</button>}{onExportCard && <button onClick={onExportCard}>CARTÃO SEM SPOILERS</button>}</div>}</div>}
+     <button className={styles.backButton} onClick={onBack}>VOLTAR</button>
+   </section>;
+ }
+\ No newline at end of file
+--- /tmp/CIPHER_RC12_ORIG/src/features/modules/ModulePanel.module.css	2026-08-26 15:25:41.233962883 +0000
++++ src/features/modules/ModulePanel.module.css	2026-08-26 15:20:11.381041496 +0000
+@@ -160,3 +160,5 @@
+     border: 1px solid #24505e;
+   }
+ }
++
++.reportActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.reportActions button{border:1px solid #26bcd0;background:#0c2630;color:#dff9fc;padding:10px 14px;font:600 8px "JetBrains Mono";letter-spacing:.8px;cursor:pointer}.reportActions button:hover{background:#103642}

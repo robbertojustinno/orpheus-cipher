@@ -1,7 +1,8 @@
 import { normalizeAnswer } from './answerNormalizer'
 import type { EnigmaValidator, ValidationContext, ValidationResult } from './enigmaTypes'
+import { validateCanonicalAnswer } from '../services/canonicalContent'
 
-const DEV_ANSWERS:Readonly<Record<string,string>>=import.meta.env.DEV?Object.freeze({'box-01':'dev-answer-01','box-02':'dev-answer-02','box-03':'dev-answer-03','box-04':'dev-answer-04'}):Object.freeze({})
+const DEV_ANSWERS:Readonly<Record<string,string>>=import.meta.env.DEV?Object.freeze(Object.fromEntries(Array.from({length:12},(_,index)=>[`box-${String(index+1).padStart(2,'0')}`,`dev-answer-${String(index+1).padStart(2,'0')}`]))):Object.freeze({})
 export const hasDevelopmentAnswers=()=>import.meta.env.DEV&&Object.keys(DEV_ANSWERS).length>0
 
 export class LocalDevelopmentValidator implements EnigmaValidator{
@@ -15,6 +16,10 @@ export class LocalDevelopmentValidator implements EnigmaValidator{
  }
 }
 export class ProductionValidator implements EnigmaValidator{
- async validate():Promise<ValidationResult>{return{correct:false,feedbackCode:'VALIDATOR_UNAVAILABLE'}}
+ async validate(enigmaId:string,answer:string,context:ValidationContext):Promise<ValidationResult>{
+  if(!answer.trim())return{correct:false,feedbackCode:'INVALID_FORMAT'}
+  const feedbackCode=await validateCanonicalAnswer(enigmaId,answer,{founderId:context.state.founderId,founderTotal:context.state.founderTotal})
+  return{correct:feedbackCode==='CORRECT',feedbackCode,unlockEffects:feedbackCode==='CORRECT'?context.definition.unlocks:undefined}
+ }
 }
 export function createEnigmaValidator():EnigmaValidator{return import.meta.env.DEV?new LocalDevelopmentValidator():new ProductionValidator()}

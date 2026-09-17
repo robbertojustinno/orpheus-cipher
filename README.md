@@ -8,7 +8,7 @@ Aplicativo narrativo desenvolvido com React, Vite, TypeScript e Tauri 2. No desk
 - Web: fallback isolado em `localStorage`.
 - Arquivo Windows: `%APPDATA%\com.cipher.orpheus\orpheus-state.json`.
 - Chave persistida: `narrative`.
-- Schema atual: versão `1`, normalizado por `migrateNarrativeState()`.
+- Schema atual: versão `2`, normalizado por `migrateNarrativeState()` e compatível com saves da Fase 7.
 
 A inicialização carrega o save, obtém a identidade local, hidrata o store e somente então monta a sequência narrativa.
 
@@ -41,8 +41,8 @@ npm run tauri:build
 
 Artefatos:
 
-- `src-tauri/target/release/bundle/nsis/ORPHEUS_0.7.0_x64-setup.exe`
-- `src-tauri/target/release/bundle/msi/ORPHEUS_0.7.0_x64_en-US.msi`
+- `src-tauri/target/release/bundle/nsis/ORPHEUS_1.0.0_x64-setup.exe`
+- `src-tauri/target/release/bundle/msi/ORPHEUS_1.0.0_x64_en-US.msi`
 
 ## Testes
 
@@ -67,7 +67,7 @@ Comandos narrativos secretos possuem uma infraestrutura separada e não aparecem
 
 As Caixas Enigmas usam uma engine desacoplada para tentativas, pistas progressivas, pré-requisitos, progresso ponderado e efeitos de desbloqueio. O workspace preserva o visual aprovado e apresenta briefing, evidências, pistas e validação como um arquivo classificado.
 
-Este repositório contém somente a engine pública e placeholders explícitos. Respostas canônicas, spoilers e chaves narrativas não são armazenados no frontend. A build de produção usa um provider sem validação local; respostas fictícias e ferramentas de teste existem apenas no modo DEV e são removidas do bundle de produção.
+Este repositório contém somente a engine e metadados públicos sem solução. Respostas canônicas, spoilers, gatilhos secretos e chaves narrativas não são armazenados no frontend. Conteúdo e validação de produção usam um canal externo configurável; respostas fictícias e ferramentas de teste existem apenas no modo DEV e são removidas do bundle de produção.
 
 ## Phase 5 — Deep Search
 
@@ -87,8 +87,16 @@ O acesso completo é precedido por autorização de licença assinada Ed25519. F
 
 O protocolo público está em [License Protocol](docs/LICENSE_PROTOCOL.md). Chaves privadas e licenças reais não pertencem a este repositório.
 
+## Phase 8 — Final Narrative Campaign
+
+A campanha pública registra 12 Caixas Enigmas em três atos, pré-requisitos progressivos, arquivos e mensagens desbloqueáveis, conteúdo bônus Founder, descobertas classificadas, badges, relatório final e cartão compartilhável sem hostname. Perguntas, pistas canônicas, respostas, comandos secretos e fragmentos Founder permanecem fora do repositório e são entregues pelo canal narrativo autorizado.
+
+O cliente de produção não possui resposta local nem hash reversível. Sem um endpoint HTTPS configurado em `VITE_ORPHEUS_NARRATIVE_ENDPOINT`, o aplicativo informa que o canal canônico está indisponível e não consome tentativa. O serviço deve validar a licença no ambiente de produção e retornar apenas códigos de feedback.
+
 Detalhes adicionais:
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Security](docs/SECURITY.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Distribution](docs/DISTRIBUTION.md)
+- [User Guide](docs/USER_GUIDE.md)

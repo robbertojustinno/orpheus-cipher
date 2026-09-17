@@ -1,0 +1,393 @@
+--- /mnt/data/rc13_clean/src/features/modules/ModulePanel.module.css	2026-08-26 16:21:23.631268962 +0000
++++ /mnt/data/py_rc13/src/features/modules/ModulePanel.module.css	2026-08-26 16:18:40.569942623 +0000
+@@ -162,3 +162,90 @@
+ }
+ 
+ .reportActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.reportActions button{border:1px solid #26bcd0;background:#0c2630;color:#dff9fc;padding:10px 14px;font:600 8px "JetBrains Mono";letter-spacing:.8px;cursor:pointer}.reportActions button:hover{background:#103642}
++
++.operationalItem {
++  width: 100%;
++  min-height: 72px !important;
++  height: auto !important;
++  text-align: left;
++  cursor: pointer;
++}
++.operationalItem > span {
++  display: grid;
++  gap: 5px;
++  min-width: 0;
++}
++.operationalItem strong {
++  color: #82d4de;
++  font: 500 12px "JetBrains Mono";
++}
++.operationalItem small {
++  color: #738790;
++  font: 500 8px "JetBrains Mono";
++  letter-spacing: .35px;
++}
++.operationalItem > b {
++  color: var(--cyan);
++  font: 600 7px "JetBrains Mono";
++  letter-spacing: 1px;
++}
++.operationalDetail {
++  max-width: 700px;
++  border-left: 2px solid var(--cyan);
++  background: #0b171f;
++  padding: 20px;
++}
++.operationalDetail > strong {
++  display: block;
++  margin: 8px 0 18px;
++  color: #82d4de;
++  font: 500 15px "JetBrains Mono";
++}
++.operationalDetail dl {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 8px;
++  margin: 0 0 18px;
++}
++.operationalDetail dl > div {
++  border: 1px solid #1f414c;
++  background: #081219;
++  padding: 10px;
++}
++.operationalDetail dt {
++  color: #52717c;
++  font: 500 7px "JetBrains Mono";
++  letter-spacing: 1px;
++}
++.operationalDetail dd {
++  margin: 5px 0 0;
++  color: #cde4e9;
++  font: 500 9px "JetBrains Mono";
++}
++.operationalDetail h3 {
++  margin: 18px 0 8px;
++  color: #69c9d6;
++  font: 600 9px "JetBrains Mono";
++  letter-spacing: 1px;
++}
++.operationalDetail p {
++  color: #98a9b1;
++  font-size: 11px;
++  line-height: 1.7;
++}
++.classifiedNote {
++  border-top: 1px solid #1f414c;
++  padding-top: 12px;
++  color: #607983 !important;
++  font-family: "JetBrains Mono";
++  font-size: 8px !important;
++}
++.exportStatus {
++  margin-top: 12px !important;
++  color: #82d4de !important;
++  overflow-wrap: anywhere;
++  font: 500 8px "JetBrains Mono" !important;
++}
++@media (max-width: 600px) {
++  .operationalDetail dl { grid-template-columns: 1fr; }
++}
+--- /mnt/data/rc13_clean/src/features/modules/OperationalPanel.tsx	2026-08-26 16:21:23.631666002 +0000
++++ /mnt/data/py_rc13/src/features/modules/OperationalPanel.tsx	2026-08-26 16:18:07.476084589 +0000
+@@ -1,5 +1,8 @@
++import { useEffect, useState } from "react";
+ import { Icon } from "../../components/Icon";
++import type { ExportResult } from "../narrative/operationReport";
+ import styles from "./ModulePanel.module.css";
++import { getOperationalFileDetail, getOperationalMessageDetail, type OperationalRecordDetail } from "./operationalContent";
+ 
+ export type OperationalModule = "files" | "messages" | "missions" | "report";
+ 
+@@ -25,18 +28,66 @@
+   </div>;
+ }
+ 
+-export function OperationalPanel({ module, solvedCount, unlockedFiles, unlockedMessages, missionActive, onBack, onExportReport, onExportCard }: { module: OperationalModule; solvedCount: number; unlockedFiles: string[]; unlockedMessages: string[]; missionActive: boolean; onBack: () => void; onExportReport?: () => void; onExportCard?: () => void }) {
++function OperationalDetail({ detail, kind, onBack }: { detail: OperationalRecordDetail; kind: "file" | "message"; onBack: () => void }) {
++  return <div className={styles.operationalDetail} data-testid={`${kind}-detail`}>
++    <small>{kind === "file" ? "ORPHEUS // AUTHORIZED FILE" : "ORPHEUS // AUTHORIZED MESSAGE"}</small>
++    <strong>{detail.title}</strong>
++    <dl>
++      <div><dt>CLASSIFICAÇÃO</dt><dd>{detail.classification}</dd></div>
++      <div><dt>STATUS</dt><dd>{detail.status}</dd></div>
++      <div><dt>ORIGEM</dt><dd>{detail.source}</dd></div>
++      <div><dt>CANAL</dt><dd>{detail.channel}</dd></div>
++    </dl>
++    <h3>{kind === "file" ? "METADADOS DO FRAGMENTO" : "REGISTRO DA COMUNICAÇÃO"}</h3>
++    <p>{detail.summary}</p>
++    <p className={styles.classifiedNote}>{detail.note}</p>
++    <button className={styles.backButton} onClick={onBack}>VOLTAR À LISTA</button>
++  </div>;
++}
++
++interface OperationalPanelProps {
++  module: OperationalModule;
++  solvedCount: number;
++  unlockedFiles: string[];
++  unlockedMessages: string[];
++  missionActive: boolean;
++  onBack: () => void;
++  onExportReport?: () => Promise<ExportResult>;
++  onExportCard?: () => Promise<ExportResult>;
++}
++
++export function OperationalPanel({ module, solvedCount, unlockedFiles, unlockedMessages, missionActive, onBack, onExportReport, onExportCard }: OperationalPanelProps) {
++  const [selectedRecord, setSelectedRecord] = useState<string | null>(null);
++  const [exportStatus, setExportStatus] = useState("");
++  useEffect(() => { setSelectedRecord(null); setExportStatus(""); }, [module]);
++
+   const title = module === "files" ? "ARQUIVOS" : module === "messages" ? "MENSAGENS" : module === "missions" ? "MISSÕES" : "RELATÓRIO FINAL";
+   const icon = module === "files" ? "archive" : module === "messages" ? "message" : module === "missions" ? "target" : "report";
++  const runExport = async (action: (() => Promise<ExportResult>) | undefined, label: string) => {
++    if (!action) return;
++    setExportStatus(`${label} // PROCESSANDO...`);
++    try {
++      const result = await action();
++      setExportStatus(result.path ? `${label} SALVO // ${result.path}` : `${label} // DOWNLOAD INICIADO`);
++    } catch {
++      setExportStatus(`${label} // FALHA AO SALVAR`);
++    }
++  };
++
++  const selectedDetail = selectedRecord
++    ? module === "files" ? getOperationalFileDetail(selectedRecord) : module === "messages" ? getOperationalMessageDetail(selectedRecord) : null
++    : null;
++
+   return <section className={styles.panel} data-testid={`module-${module}`}>
+     <header><div><Icon name={icon as any} size={23} /></div><span><small>ORPHEUS // {module.toUpperCase()}</small><h1>{title}</h1></span></header>
+     {module === "files" && <>
+       <p>Índice de fragmentos recuperados pelo canal narrativo. Arquivos não liberados permanecem protegidos.</p>
+-      <div className={styles.dossierList}>{unlockedFiles.length ? unlockedFiles.map(file => <div className={styles.result} key={file}><strong>{file.toUpperCase()}</strong><p>FRAGMENTO RESTAURADO // CONTEÚDO AUTORIZADO</p></div>) : <div className={styles.result}><strong>ACESSO AO COFRE</strong><p>ACESSO NEGADO // NÍVEL DE AUTORIZAÇÃO INSUFICIENTE.</p><p>Arquivos restaurados: {solvedCount}/12. REQUER PROGRESSÃO.</p></div>}</div>
++      {selectedDetail ? <OperationalDetail detail={selectedDetail} kind="file" onBack={() => setSelectedRecord(null)} /> :
++      <div className={styles.dossierList}>{unlockedFiles.length ? unlockedFiles.map(file => <button className={styles.operationalItem} key={file} onClick={() => setSelectedRecord(file)}><span><strong>{file.toUpperCase()}</strong><small>FRAGMENTO RESTAURADO // CONTEÚDO AUTORIZADO</small></span><b>ABRIR</b></button>) : <div className={styles.result}><strong>ACESSO AO COFRE</strong><p>ACESSO NEGADO // NÍVEL DE AUTORIZAÇÃO INSUFICIENTE.</p><p>Arquivos restaurados: {solvedCount}/12. REQUER PROGRESSÃO.</p></div>}</div>}
+     </>}
+-    {module === "messages" && <><p>Comunicações liberadas pela progressão da operação.</p><div className={styles.dossierList}>{unlockedMessages.length ? unlockedMessages.map(message => <div className={styles.result} key={message}><strong>{message.toUpperCase()}</strong><p>CANAL CIPHER // CONTEÚDO AUTORIZADO</p></div>) : <div className={styles.result}><strong>CAIXA DE ENTRADA VAZIA</strong><p>NENHUMA MENSAGEM AUTORIZADA NESTE ESTÁGIO.</p></div>}</div></>}
++    {module === "messages" && <><p>Comunicações liberadas pela progressão da operação.</p>{selectedDetail ? <OperationalDetail detail={selectedDetail} kind="message" onBack={() => setSelectedRecord(null)} /> : <div className={styles.dossierList}>{unlockedMessages.length ? unlockedMessages.map(message => <button className={styles.operationalItem} key={message} onClick={() => setSelectedRecord(message)}><span><strong>{message.toUpperCase()}</strong><small>CANAL CIPHER // CONTEÚDO AUTORIZADO</small></span><b>ABRIR</b></button>) : <div className={styles.result}><strong>CAIXA DE ENTRADA VAZIA</strong><p>NENHUMA MENSAGEM AUTORIZADA NESTE ESTÁGIO.</p></div>}</div>}</>}
+     {module === "missions" && <div className={styles.result}><strong>{missionActive ? "MISSÃO EM ANDAMENTO" : "MISSÃO EM ESPERA"}</strong><p>{missionActive ? "Recuperar a chave narrativa e identificar o padrão por trás do Protocolo Orpheus." : "A missão será disponibilizada quando a sequência narrativa for iniciada."}</p></div>}
+-    {module === "report" && <div className={styles.result}><strong>{solvedCount === 12 ? "RELATÓRIO FINAL DISPONÍVEL" : "RELATÓRIO FINAL BLOQUEADO"}</strong><p>{solvedCount === 12 ? "A operação principal foi concluída. Exporte o relatório operacional ou o cartão sem spoilers." : `PROGRESSÃO INCOMPLETA // ${solvedCount}/12 enigmas restaurados.`}</p>{solvedCount === 12 && <div className={styles.reportActions}>{onExportReport && <button onClick={onExportReport}>EXPORTAR RELATÓRIO</button>}{onExportCard && <button onClick={onExportCard}>CARTÃO SEM SPOILERS</button>}</div>}</div>}
++    {module === "report" && <div className={styles.result}><strong>{solvedCount === 12 ? "RELATÓRIO FINAL DISPONÍVEL" : "RELATÓRIO FINAL BLOQUEADO"}</strong><p>{solvedCount === 12 ? "A operação principal foi concluída. Exporte o relatório operacional ou o cartão sem spoilers." : `PROGRESSÃO INCOMPLETA // ${solvedCount}/12 enigmas restaurados.`}</p>{solvedCount === 12 && <><div className={styles.reportActions}>{onExportReport && <button onClick={() => { void runExport(onExportReport, "RELATÓRIO"); }}>EXPORTAR RELATÓRIO</button>}{onExportCard && <button onClick={() => { void runExport(onExportCard, "CARTÃO"); }}>CARTÃO SEM SPOILERS</button>}</div>{exportStatus && <p className={styles.exportStatus} role="status">{exportStatus}</p>}</>}</div>}
+     <button className={styles.backButton} onClick={onBack}>VOLTAR</button>
+   </section>;
+-}
+\ No newline at end of file
++}
+--- /dev/null	2026-08-26 16:14:04.237210380 +0000
++++ /mnt/data/py_rc13/src/features/modules/operationalContent.ts	2026-08-26 16:18:07.473123228 +0000
+@@ -0,0 +1,51 @@
++import { enigmaDefinitions } from "../../data/enigmas";
++
++export interface OperationalRecordDetail {
++  id: string;
++  title: string;
++  classification: string;
++  status: string;
++  source: string;
++  channel: string;
++  summary: string;
++  note: string;
++}
++
++function enigmaByNumber(number: number) {
++  return enigmaDefinitions.find((item) => item.number === number);
++}
++
++export function getOperationalFileDetail(id: string): OperationalRecordDetail {
++  const match = /^operation-fragment-(\d{2})$/i.exec(id);
++  const number = match ? Number(match[1]) : NaN;
++  const enigma = Number.isFinite(number) ? enigmaByNumber(number) : undefined;
++  return {
++    id,
++    title: id.toUpperCase(),
++    classification: "AUTHORIZED FRAGMENT",
++    status: "RESTORED",
++    source: enigma?.title ?? "ORIGEM NÃO INDEXADA",
++    channel: enigma?.subtitle ?? "ORPHEUS // FILE CHANNEL",
++    summary: enigma?.description ?? "Nenhum metadado narrativo adicional está autorizado para este fragmento.",
++    note: "Este registro expõe somente metadados públicos já presentes no aplicativo. Conteúdo canônico sensível permanece protegido pelo canal narrativo.",
++  };
++}
++
++export function getOperationalMessageDetail(id: string): OperationalRecordDetail {
++  const match = /^cipher-message-(\d{2})$/i.exec(id);
++  const messageNumber = match ? Number(match[1]) : NaN;
++  const sourceNumber = Number.isFinite(messageNumber) ? messageNumber * 3 : NaN;
++  const enigma = Number.isFinite(sourceNumber) ? enigmaByNumber(sourceNumber) : undefined;
++  return {
++    id,
++    title: id.toUpperCase(),
++    classification: "CIPHER CHANNEL",
++    status: "RECEIVED",
++    source: enigma?.title ?? "ORIGEM NÃO INDEXADA",
++    channel: enigma?.subtitle ?? "ORPHEUS // MESSAGE CHANNEL",
++    summary: enigma?.description ?? "Nenhum conteúdo narrativo adicional está autorizado para esta comunicação.",
++    note: enigma
++      ? `Comunicação de sistema liberada pela progressão associada a ${enigma.title}. Nenhum diálogo ou fato canônico novo foi acrescentado.`
++      : "Comunicação de sistema registrada sem conteúdo narrativo adicional autorizado.",
++  };
++}
+--- /mnt/data/rc13_clean/src/features/narrative/operationReport.ts	2026-08-26 16:21:23.631879825 +0000
++++ /mnt/data/py_rc13/src/features/narrative/operationReport.ts	2026-08-26 16:18:07.474649666 +0000
+@@ -1,17 +1,43 @@
++import { invoke } from '@tauri-apps/api/core'
+ import type { NarrativeProgress } from '../../types'
+ 
+-const download=(name:string,type:string,content:string)=>{const url=URL.createObjectURL(new Blob([content],{type}));const anchor=document.createElement('a');anchor.href=url;anchor.download=name;anchor.click();URL.revokeObjectURL(url)}
++export interface ExportResult { name:string; mode:'native'|'browser'; path?:string }
+ 
+-export function exportOperationReport(progress:NarrativeProgress){
++function isTauriRuntime(){
++ return typeof window!=='undefined'&&'__TAURI_INTERNALS__' in window
++}
++
++function browserDownload(name:string,type:string,content:string):ExportResult{
++ const url=URL.createObjectURL(new Blob([content],{type}))
++ const anchor=document.createElement('a')
++ anchor.href=url
++ anchor.download=name
++ anchor.style.display='none'
++ document.body.appendChild(anchor)
++ anchor.click()
++ anchor.remove()
++ window.setTimeout(()=>URL.revokeObjectURL(url),1000)
++ return{name,mode:'browser'}
++}
++
++async function saveExport(name:string,type:string,content:string):Promise<ExportResult>{
++ if(isTauriRuntime()){
++  const path=await invoke<string>('save_export_file',{filename:name,content})
++  return{name,mode:'native',path}
++ }
++ return browserDownload(name,type,content)
++}
++
++export async function exportOperationReport(progress:NarrativeProgress):Promise<ExportResult>{
+  const solved=Object.entries(progress.enigmas).filter(([,state])=>state.status==='solved')
+  const attempts=solved.reduce((sum,[,state])=>sum+state.attempts,0)
+  const hints=solved.reduce((sum,[,state])=>sum+state.hintsUnlocked.length,0)
+  const report={product:'ORPHEUS',version:'1.0',operator:progress.operator.username,founderId:progress.founderId,completedAt:progress.completionDate,mainEnigmasSolved:solved.map(([id])=>id),attempts,hintsUsed:hints,secretDiscoveries:progress.secretDiscoveries.length,badges:progress.unlockedBadges}
+- download('orpheus-operation-report.json','application/json',JSON.stringify(report,null,2))
++ return saveExport('orpheus-operation-report.json','application/json',JSON.stringify(report,null,2))
+ }
+ 
+-export function exportShareCard(progress:NarrativeProgress){
++export async function exportShareCard(progress:NarrativeProgress):Promise<ExportResult>{
+  const founder=progress.founderId>=1&&progress.founderId<=30?`FOUNDER ${String(progress.founderId).padStart(2,'0')}/30`:'CIPHER ACCESS'
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#020711"/><stop offset="1" stop-color="#092033"/></linearGradient></defs><rect width="1200" height="630" fill="url(#g)"/><rect x="48" y="48" width="1104" height="534" fill="none" stroke="#31caef" stroke-opacity=".5"/><text x="90" y="135" fill="#58daf8" font-family="monospace" font-size="24" letter-spacing="7">ORPHEUS // OPERATION COMPLETE</text><text x="90" y="285" fill="#f1fbff" font-family="Arial" font-size="72" font-weight="700">CIPHER OPERATIVE</text><text x="90" y="365" fill="#7af2b0" font-family="monospace" font-size="34" letter-spacing="5">${founder}</text><text x="90" y="510" fill="#7892a6" font-family="monospace" font-size="22">MAIN OPERATION 100% // CLASSIFIED ACCESS PRESERVED</text></svg>`
+- download('orpheus-operation-complete.svg','image/svg+xml',svg)
++ return saveExport('orpheus-operation-complete.svg','image/svg+xml',svg)
+ }
+--- /mnt/data/rc13_clean/src/features/narrative/CompletionPanel.tsx	2026-08-26 16:21:23.631756119 +0000
++++ /mnt/data/py_rc13/src/features/narrative/CompletionPanel.tsx	2026-08-26 16:18:41.985882136 +0000
+@@ -4,5 +4,5 @@
+ 
+ export function CompletionPanel({progress,onClose}:{progress:NarrativeProgress;onClose:()=>void}){
+  const solved=Object.values(progress.enigmas).filter(item=>item.status==='solved').length
+- return <div className={styles.backdrop}><section className={styles.panel} role="dialog" aria-modal="true"><small>ORPHEUS // FINAL OPERATION</small><h2>FINAL KEY ACCEPTED</h2><h3>ORPHEUS CORE UNLOCKED</h3><div className={styles.sequence}><b>THREAT CONTAINED.</b><span>COMMAND AUTHORITY REVOKED.</span><span>EVIDENCE CHAIN PRESERVED.</span><b>NOT ALL NODES RESPONDED.</b></div><p>A operação principal foi concluída. O nome sobreviveu — e a rede ainda guarda zonas classificadas.</p><div className={styles.stats}><span><small>MAIN OPERATION</small><strong>{solved}/12</strong></span><span><small>CLASSIFIED DISCOVERY</small><strong>{progress.secretDiscoveries.length}</strong></span></div><button onClick={()=>exportOperationReport(progress)}>EXPORTAR RELATÓRIO</button> <button onClick={()=>exportShareCard(progress)}>CARTÃO SEM SPOILERS</button> <button onClick={onClose}>ARQUIVAR</button></section></div>
++ return <div className={styles.backdrop}><section className={styles.panel} role="dialog" aria-modal="true"><small>ORPHEUS // FINAL OPERATION</small><h2>FINAL KEY ACCEPTED</h2><h3>ORPHEUS CORE UNLOCKED</h3><div className={styles.sequence}><b>THREAT CONTAINED.</b><span>COMMAND AUTHORITY REVOKED.</span><span>EVIDENCE CHAIN PRESERVED.</span><b>NOT ALL NODES RESPONDED.</b></div><p>A operação principal foi concluída. O nome sobreviveu — e a rede ainda guarda zonas classificadas.</p><div className={styles.stats}><span><small>MAIN OPERATION</small><strong>{solved}/12</strong></span><span><small>CLASSIFIED DISCOVERY</small><strong>{progress.secretDiscoveries.length}</strong></span></div><button onClick={()=>{void exportOperationReport(progress)}}>EXPORTAR RELATÓRIO</button> <button onClick={()=>{void exportShareCard(progress)}}>CARTÃO SEM SPOILERS</button> <button onClick={onClose}>ARQUIVAR</button></section></div>
+ }
+--- /mnt/data/rc13_clean/src-tauri/src/lib.rs	2026-08-26 16:21:23.651188437 +0000
++++ /mnt/data/py_rc13/src-tauri/src/lib.rs	2026-08-26 16:22:35.321188319 +0000
+@@ -3,6 +3,8 @@
+ use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+ use hickory_resolver::{proto::rr::RecordType, Resolver, TokioResolver};
+ use std::time::Duration;
++use std::path::{Path, PathBuf};
++use std::ffi::OsStr;
+ 
+ const LICENSE_KEY_ID: &str = "orpheus-2026-01";
+ const LICENSE_PUBLIC_KEY: &str = "brK0nUXFPiSlwzieGtJHeftNWzpl1x3Df-awzpwdOXs";
+@@ -70,6 +72,36 @@
+         .unwrap_or_else(|| fallback.to_string())
+ }
+ 
++fn safe_export_filename(filename: &str) -> bool {
++    if filename.is_empty() || filename.len() > 128 { return false; }
++    if Path::new(filename).file_name() != Some(OsStr::new(filename)) { return false; }
++    matches!(Path::new(filename).extension().and_then(OsStr::to_str), Some("json") | Some("svg"))
++}
++
++fn downloads_dir() -> Result<PathBuf, String> {
++    let home = std::env::var_os("USERPROFILE")
++        .or_else(|| std::env::var_os("HOME"))
++        .ok_or_else(|| "EXPORT DIRECTORY UNAVAILABLE".to_string())?;
++    let downloads = PathBuf::from(&home).join("Downloads");
++    if downloads.is_dir() { Ok(downloads) } else { Ok(PathBuf::from(home)) }
++}
++
++#[tauri::command]
++fn save_export_file(filename: String, content: String) -> Result<String, String> {
++    if !safe_export_filename(&filename) { return Err("INVALID EXPORT FILENAME".into()); }
++    if content.len() > 2_000_000 { return Err("EXPORT TOO LARGE".into()); }
++    let directory = downloads_dir()?;
++    let mut target = directory.join(&filename);
++    if target.exists() {
++        let stem = Path::new(&filename).file_stem().and_then(OsStr::to_str).unwrap_or("orpheus-export");
++        let extension = Path::new(&filename).extension().and_then(OsStr::to_str).unwrap_or("txt");
++        let stamp = chrono::Utc::now().timestamp();
++        target = directory.join(format!("{stem}-{stamp}.{extension}"));
++    }
++    std::fs::write(&target, content.as_bytes()).map_err(|_| "EXPORT WRITE FAILED".to_string())?;
++    Ok(target.to_string_lossy().to_string())
++}
++
+ #[tauri::command]
+ fn get_operator_identity() -> OperatorIdentity {
+     OperatorIdentity {
+@@ -137,7 +169,7 @@
+     tauri::Builder::default()
+         .plugin(tauri_plugin_store::Builder::new().build())
+         .plugin(tauri_plugin_opener::init())
+-        .invoke_handler(tauri::generate_handler![get_operator_identity, resolve_public_dns, verify_license_token])
++        .invoke_handler(tauri::generate_handler![get_operator_identity, resolve_public_dns, verify_license_token, save_export_file])
+         .run(tauri::generate_context!())
+         .expect("erro ao iniciar ORPHEUS");
+ }
+@@ -180,6 +212,13 @@
+         let(token,key)=signed_test_license(None,"MASTER","active");assert_eq!(verify_license_with_key(&token,&key).unwrap().license_type,"MASTER");
+     }
+     #[test]
++    fn export_filename_rejects_traversal_and_unapproved_extensions() {
++        assert!(safe_export_filename("orpheus-operation-report.json"));
++        assert!(safe_export_filename("orpheus-operation-complete.svg"));
++        assert!(!safe_export_filename("../secret.json"));
++        assert!(!safe_export_filename("private.key"));
++    }
++    #[test]
+     fn tampering_and_revocation_are_rejected() {
+         let(token,key)=signed_test_license(Some(7),"FOUNDER","active");let mut parts:Vec<String>=token.split('.').map(str::to_string).collect();let mut payload=URL_SAFE_NO_PAD.decode(&parts[1]).unwrap();payload[10]^=1;parts[1]=URL_SAFE_NO_PAD.encode(payload);assert_eq!(verify_license_with_key(&parts.join("."),&key).unwrap_err(),"INVALID SIGNATURE");
+         let(revoked,key)=signed_test_license(Some(7),"FOUNDER","revoked");assert_eq!(verify_license_with_key(&revoked,&key).unwrap_err(),"LICENSE REVOKED");
+--- /dev/null	2026-08-26 16:14:04.237210380 +0000
++++ /mnt/data/py_rc13/tests/operationalModules.test.ts	2026-08-26 16:18:48.365600269 +0000
+@@ -0,0 +1,28 @@
++import { describe, expect, it } from 'vitest'
++import { getOperationalFileDetail, getOperationalMessageDetail } from '../src/features/modules/operationalContent'
++import { readFileSync } from 'node:fs'
++
++describe('operational modules',()=>{
++ it('maps an unlocked file to existing public enigma metadata without answers',()=>{
++  const detail=getOperationalFileDetail('operation-fragment-01')
++  expect(detail.source).toContain('Enigma 01')
++  expect(detail.summary).toContain('primeira peça')
++  expect(JSON.stringify(detail).toLowerCase()).not.toContain('answer')
++ })
++ it('maps an unlocked message to its existing progression source without inventing dialogue',()=>{
++  const detail=getOperationalMessageDetail('cipher-message-01')
++  expect(detail.source).toContain('Enigma 03')
++  expect(detail.note).toContain('Nenhum diálogo')
++ })
++ it('renders operational items as explicit open actions and provides export status',()=>{
++  const source=readFileSync(new URL('../src/features/modules/OperationalPanel.tsx',import.meta.url),'utf8')
++  expect(source).toContain('ABRIR')
++  expect(source).toContain('VOLTAR À LISTA')
++  expect(source).toContain('FALHA AO SALVAR')
++ })
++ it('uses a native Tauri export command with a browser fallback',()=>{
++  const source=readFileSync(new URL('../src/features/narrative/operationReport.ts',import.meta.url),'utf8')
++  expect(source).toContain("invoke<string>('save_export_file'")
++  expect(source).toContain('browserDownload')
++ })
++})

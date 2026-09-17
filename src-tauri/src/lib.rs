@@ -3,6 +3,8 @@ use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use hickory_resolver::{proto::rr::RecordType, Resolver, TokioResolver};
 use std::time::Duration;
+use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
 
 const LICENSE_KEY_ID: &str = "orpheus-2026-01";
 const LICENSE_PUBLIC_KEY: &str = "brK0nUXFPiSlwzieGtJHeftNWzpl1x3Df-awzpwdOXs";
@@ -68,6 +70,36 @@ fn safe_env(keys: &[&str], fallback: &str) -> String {
         .find_map(|key| std::env::var(key).ok())
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| fallback.to_string())
+}
+
+fn safe_export_filename(filename: &str) -> bool {
+    if filename.is_empty() || filename.len() > 128 { return false; }
+    if Path::new(filename).file_name() != Some(OsStr::new(filename)) { return false; }
+    matches!(Path::new(filename).extension().and_then(OsStr::to_str), Some("json") | Some("svg"))
+}
+
+fn downloads_dir() -> Result<PathBuf, String> {
+    let home = std::env::var_os("USERPROFILE")
+        .or_else(|| std::env::var_os("HOME"))
+        .ok_or_else(|| "EXPORT DIRECTORY UNAVAILABLE".to_string())?;
+    let downloads = PathBuf::from(&home).join("Downloads");
+    if downloads.is_dir() { Ok(downloads) } else { Ok(PathBuf::from(home)) }
+}
+
+#[tauri::command]
+fn save_export_file(filename: String, content: String) -> Result<String, String> {
+    if !safe_export_filename(&filename) { return Err("INVALID EXPORT FILENAME".into()); }
+    if content.len() > 2_000_000 { return Err("EXPORT TOO LARGE".into()); }
+    let directory = downloads_dir()?;
+    let mut target = directory.join(&filename);
+    if target.exists() {
+        let stem = Path::new(&filename).file_stem().and_then(OsStr::to_str).unwrap_or("orpheus-export");
+        let extension = Path::new(&filename).extension().and_then(OsStr::to_str).unwrap_or("txt");
+        let stamp = chrono::Utc::now().timestamp();
+        target = directory.join(format!("{stem}-{stamp}.{extension}"));
+    }
+    std::fs::write(&target, content.as_bytes()).map_err(|_| "EXPORT WRITE FAILED".to_string())?;
+    Ok(target.to_string_lossy().to_string())
 }
 
 #[tauri::command]
@@ -137,7 +169,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_operator_identity, resolve_public_dns, verify_license_token])
+        .invoke_handler(tauri::generate_handler![get_operator_identity, resolve_public_dns, verify_license_token, save_export_file])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar ORPHEUS");
 }
@@ -178,6 +210,13 @@ mod tests {
         for number in [1,30]{let(token,key)=signed_test_license(Some(number),"FOUNDER","active");assert_eq!(verify_license_with_key(&token,&key).unwrap().founder_number,Some(number));}
         for number in [0,31]{let(token,key)=signed_test_license(Some(number),"FOUNDER","active");assert_eq!(verify_license_with_key(&token,&key).unwrap_err(),"INVALID LICENSE IDENTITY");}
         let(token,key)=signed_test_license(None,"MASTER","active");assert_eq!(verify_license_with_key(&token,&key).unwrap().license_type,"MASTER");
+    }
+    #[test]
+    fn export_filename_rejects_traversal_and_unapproved_extensions() {
+        assert!(safe_export_filename("orpheus-operation-report.json"));
+        assert!(safe_export_filename("orpheus-operation-complete.svg"));
+        assert!(!safe_export_filename("../secret.json"));
+        assert!(!safe_export_filename("private.key"));
     }
     #[test]
     fn tampering_and_revocation_are_rejected() {
