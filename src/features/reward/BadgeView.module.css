@@ -1,0 +1,113 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: #02060af2;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.panel {
+  width: min(720px, 100%);
+  margin: auto;
+  border: 1px solid #31505d;
+  background: #081119;
+  padding: 30px;
+  box-shadow: 0 25px 90px #000;
+}
+.badge {
+  text-align: center;
+}
+.panel > small {
+  font: 600 7px "JetBrains Mono";
+  letter-spacing: 1.5px;
+  color: #5d8491;
+}
+.badgeImage {
+  display: block;
+  width: min(280px, 60vw);
+  height: auto;
+  margin: 14px auto 8px;
+  object-fit: contain;
+}
+.badge h2 {
+  margin: 8px 0;
+  color: #e2edf1;
+  font: 400 21px "JetBrains Mono";
+  letter-spacing: 1px;
+}
+.badge p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #1b3039;
+  padding: 8px 10px;
+  margin: 0;
+  color: #94a8b1;
+  font-size: 11px;
+}
+.badge p span {
+  color: #647d88;
+}
+.badge p strong,
+.badge code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.badge code {
+  color: #58d6e7;
+}
+.returnButton {
+  display: block;
+  margin: 14px auto 0;
+  border: 1px solid #26bcd0;
+  background: #116e80;
+  color: #fff;
+  padding: 12px 18px;
+  font: 600 8px "JetBrains Mono";
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+@media (max-height: 800px) {
+  .backdrop {
+    padding-block: 12px;
+  }
+  .panel {
+    padding-block: 18px;
+  }
+  .badgeImage {
+    width: min(220px, 48vw);
+    margin-block: 8px 4px;
+  }
+  .badge h2 {
+    font-size: 18px;
+    margin: 4px 0;
+  }
+  .badge p {
+    padding-block: 6px;
+  }
+  .returnButton {
+    margin-top: 10px;
+  }
+}
+@media (max-height: 740px) {
+  .badgeImage {
+    width: min(180px, 44vw);
+  }
+}
+@media (max-width: 600px) {
+  .panel {
+    padding-inline: 16px;
+  }
+  .badge p {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+  }
+  .badge p strong,
+  .badge code {
+    text-align: left;
+  }
+}

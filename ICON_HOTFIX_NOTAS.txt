@@ -1,0 +1,28 @@
+ORPHEUS / CIPHER — HOTFIX VISUAL DO ÍCONE OFICIAL
+
+Escopo:
+- SOMENTE assets de ícone.
+- Nenhum .tsx, .ts, Rust, rota, reward, narrativa, persistência ou backend foi alterado.
+- O tauri.conf.json já aponta para os nomes substituídos neste pacote.
+
+Substituídos:
+- src-tauri/icons/32x32.png
+- src-tauri/icons/64x64.png
+- src-tauri/icons/128x128.png
+- src-tauri/icons/128x128@2x.png
+- src-tauri/icons/icon.png
+- src-tauri/icons/icon.ico
+- assets Square* e StoreLogo existentes
+
+Fonte adicionada:
+- src-tauri/icons/cipher-harp-source.png
+
+Aplicação:
+Expand-Archive -Path "C:\livro\Cipher\CIPHER_ICON_OFICIAL_HOTFIX.zip" -DestinationPath "C:\livro\Cipher\orpheus-app" -Force
+
+Depois:
+cd C:\livro\Cipher\orpheus-app
+npm test
+npm run tauri:build
+
+Para ver o novo ícone no atalho/instalador, reinstale o build gerado.

@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     watch: {
-      ignored: ['**/src-tauri/target/**'],
+      ignored: ['**/src-tauri/target/**', '**/.tmp/**', '**/release-artifacts/**'],
     },
   },
 })

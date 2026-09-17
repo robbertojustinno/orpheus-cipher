@@ -7,6 +7,7 @@ export async function attemptEnigma(definition:EnigmaDefinition,answer:string,st
  const current=state.enigmas[definition.id]
  const result=await validator.validate(definition.id,answer,{definition,state,development})
  if(!current)return{state,result:{correct:false,feedbackCode:'VALIDATOR_UNAVAILABLE'}}
+ if(result.feedbackCode==='VALIDATOR_UNAVAILABLE'||result.feedbackCode==='INVALID_FORMAT')return{state,result}
  const attempted:PersistedNarrativeState={...state,enigmas:{...state.enigmas,[definition.id]:{...current,status:current.status==='solved'?'solved':'active',attempts:current.attempts+1}}}
  if(!result.correct)return{state:attempted,result}
  const solvedAt=new Date().toISOString()

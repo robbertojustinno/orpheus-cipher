@@ -1,0 +1,3 @@
+import React from'react';import{createRoot}from'react-dom/client';import'./styles/global.css';import{EnigmaModal}from'./features/enigmas/EnigmaModal';import{enigmaDefinitions}from'./data/enigmas';
+const id=new URLSearchParams(location.search).get('id')??'box-01',definition=enigmaDefinitions.find(item=>item.id===id)??enigmaDefinitions[0],enigma={...definition,status:'solved' as const,progress:100,attempts:2,hintsUnlocked:[]};
+createRoot(document.getElementById('root')!).render(<EnigmaModal enigma={enigma} onClose={()=>{}} onSubmit={async()=>({correct:false,feedbackCode:'INCORRECT'})} onHint={async()=>({allowed:false,reason:'ANALYSIS_REQUIRED'})}/>)

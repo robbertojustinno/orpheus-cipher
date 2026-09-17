@@ -1,0 +1,75 @@
+﻿# ORPHEUS — LOCAL APP STABILIZATION RC5
+
+CAUSA RAIZ DO TRAVAMENTO:
+SecretRewardGate era montado incondicionalmente após campaignCompleted. SecretReward fazia early return para o badge quando rewardClaimed/claim existia, mas o badge não possuía callback, botão ou listener de saída. O overlay fixo consumia a aplicação em toda reabertura.
+
+COMPONENTE FINAL:
+src/features/narrative/CompletionPanel.tsx
+
+COMPONENTE BADGE:
+src/features/reward/SecretReward.tsx
+
+HANDLER ARQUIVAR:
+CompletionPanel.onClose em App.tsx fecha completion/enigma e incrementa rewardOpenRequest; SecretRewardGate abre a sequência/badge explicitamente.
+
+EARLY RETURN:
+SIM — preservado como composição da etapa badge, agora com VOLTAR AO MENU PRINCIPAL e ESC local com cleanup.
+
+STATE FLOW ANTES:
+campaignCompleted -> gate sempre montado -> claim existente -> badge overlay permanente.
+
+STATE FLOW DEPOIS:
+12/12 -> FINAL KEY ACCEPTED -> ARQUIVAR -> rewardOpenRequest -> OPERADOR VALIDADO -> handleReturnToMain -> Painel -> VER DISTINTIVO -> mesmo claim/código -> ESC -> Painel.
+
+DEPENDÊNCIAS REINSTALADAS: PASS
+FRONTEND TESTS: 141/141 PASS
+BACKEND TESTS: 76/76 PASS (64 narrative local + 12 reward-api local)
+PISTAS: PASS — 36/36 backend; box-01 3/3 e persistência no EXE
+SCROLL: PASS — 1366x768 e 1280x720; vertical funcional; horizontal false
+EXPORTAR RELATÓRIO: PASS — orpheus-operation-report.json Blob no WebView real
+CARTÃO SEM SPOILERS: PASS — orpheus-operation-complete.svg Blob no WebView real
+ARQUIVAR: PASS
+OPERADOR VALIDADO: PASS
+BOTÃO VOLTAR AO MENU: PASS
+ESC: PASS
+VER DISTINTIVO: PASS
+CLAIM EXISTENTE: PASS
+MASTER: PASS
+FOUNDER: PASS — teste de componente Founder 07/30 e backend
+MESMO VERIFICATION CODE: PASS — CIPHER-OP-EAB6C666BC
+PROGRESSO PRESERVADO: PASS — 12/12, secrets 0/4 não bloqueiam
+REABERTURA DO APP: PASS
+DOM BUTTON FOUND: PASS — display block; visibility visible; opacity 1; rect 177.203125 x 36
+ERROS DE CONSOLE: 0
+
+EXE INSTALADO:
+C:\Users\Justino\AppData\Local\ORPHEUS\orpheus.exe
+VERSÃO: 1.0.4
+SHA-256: 7957E0F1A7DBBB2A58584D835073F9BAC4898757DC64BCC0EF0C969C4933623D
+
+EXE DIRETO:
+C:\livro\Cipher\orpheus-app\release-artifacts\ORPHEUS_CIPHER_1.0.4_RC5.exe
+SHA-256: 5531954AF49299466B09BCED8225C5F76960B7EC60E3D529C950D1B61634B68E
+
+SETUP:
+C:\livro\Cipher\orpheus-app\release-artifacts\ORPHEUS_CIPHER_1.0.4_RC5_SETUP.exe
+SHA-256: 64F389D49D062B77DB353EBDB0149E799C1380C03DED0D9ABE63A29B4B1F5FA2
+
+MSI:
+C:\livro\Cipher\orpheus-app\release-artifacts\ORPHEUS_CIPHER_1.0.4_RC5_x64.msi
+SHA-256: 1EF437052A45D76EDA04587B48F19748029D465828AA9C753D351E7C7A4028D2
+
+SCREENSHOTS:
+C:\livro\Cipher\orpheus-app\release-artifacts\final-key-accepted.png
+C:\livro\Cipher\orpheus-app\release-artifacts\operator-validated-with-return-button.png
+C:\livro\Cipher\orpheus-app\release-artifacts\dashboard-after-return.png
+C:\livro\Cipher\orpheus-app\release-artifacts\badge-reopened.png
+
+PRODUCTION BUNDLE API:
+http://127.0.0.1:47831 (2 ocorrências); Render 0 ocorrências.
+
+RC4:
+PRESERVADO com hashes originais confirmados.
+
+STATUS:
+READY FOR INFRASTRUCTURE PHASE

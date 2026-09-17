@@ -23,7 +23,11 @@ Answers submitted through the workspace or `answer` command are transient. Termi
 
 ## Public repository boundary
 
-The repository contains engine code and explicit development placeholders only. It must not contain canonical answers, book spoilers, secret triggers, premium content, personal saves or credentials. Production builds do not contain the DEV validator table or DEV panel. Short canonical answers must eventually be validated outside the distributed frontend; local hashes are not treated as adequate secrecy.
+The repository contains engine code and spoiler-safe public descriptors only. It must not contain canonical answers, book spoilers, secret triggers, premium content, personal saves or credentials. Production builds do not contain the DEV validator table, DEV panel or development OSINT provider. Short canonical answers are validated outside the distributed frontend; local hashes are not treated as adequate secrecy.
+
+The canonical endpoint must use HTTPS, verify an authorized signed-license proof server-side, rate-limit attempts, reject oversized input and return only `CORRECT`, `INCORRECT`, `PARTIAL` or `INVALID_FORMAT`. Candidate answers must not be persisted in application state, audit events, analytics or production logs.
+
+Share cards omit hostname and machine identifiers. Operation reports contain operator display name only by explicit export action and never include answers, license tokens or secret triggers.
 
 ## Secret commands
 

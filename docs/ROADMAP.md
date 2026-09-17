@@ -1,13 +1,13 @@
 # ORPHEUS Roadmap
 
-- Phase 1 — UI Foundation
-- Phase 2 — Operator Detection & Native Persistence
-- Phase 3 — Interactive Terminal
-- Phase 4 — Enigma Engine
-- Phase 5 — Deep Search
-- Phase 6 — Advanced Correlation & Investigation Graph
-- Phase 7 — Founders Licensing & Controlled Activation
-- Phase 8 — Narrative Expansion
-- Phase 9 — Production Release
+- Phase 1 — Complete: UI Foundation
+- Phase 2 — Complete: Operator Detection & Native Persistence
+- Phase 3 — Complete: Interactive Terminal
+- Phase 4 — Complete: Enigma Engine
+- Phase 5 — Complete: Deep Search
+- Phase 6 — Complete: Advanced Correlation & Investigation Graph
+- Phase 7 — Complete: Founders Licensing & Controlled Activation
+- Phase 8 — Implementation complete: Final Narrative Campaign
+- Production gate — Pending external validator deployment, code-signing decision and clean-machine validation
 
-Installers should be distributed through GitHub Releases or another controlled release channel rather than committed to normal Git history. No Release is published during Phase 6.
+Source may remain public. Commercial installers should use a controlled delivery channel and never normal Git history. A public GitHub Release must not expose binaries intended only for verified buyers.

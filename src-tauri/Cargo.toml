@@ -1,8 +1,8 @@
 [package]
 name = "orpheus"
-version = "0.7.0"
-description = "ORPHEUS — Sistema de Inteligência"
-authors = ["CIPHER"]
+version = "1.0.12"
+description = "ORPHEUS â€” Companion Experience for CIPHER: Protocolo Orpheus"
+authors = ["Roberto Justino"]
 edition = "2021"
 
 [lib]
@@ -23,3 +23,5 @@ tokio = { version = "1", features = ["macros", "time"] }
 base64 = "0.22"
 ed25519-dalek = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+

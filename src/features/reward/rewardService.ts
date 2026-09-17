@@ -1,0 +1,12 @@
+import{rewardApiEndpoint as endpoint}from'../../config/apiEndpoints'
+export interface CompletionProof{completionId:string;completedAt:string;campaignCompleted:boolean;progress:number;solvedIds:string[];secretCount:number}
+export interface RewardEligibility{eligible:boolean;rewardUnlocked:boolean;rewardClaimed:boolean;rewardType?:'digital'|'physical';physicalEligible?:boolean;claim?:RewardClaim}
+export interface RewardClaim{verificationCode:string;displayName:string;licenseLabel:string;completedAt:string;claimedAt:string;rewardType:'digital'|'physical';rewardEditCount:number}
+export interface RewardFormData{displayName:string;email:string;confirmed:boolean;fullName?:string;address?:string;addressNumber?:string;postalCode?:string;city?:string;state?:string;country?:string;phone?:string;physicalConsent?:boolean}
+const headers=(token:string)=>({'Content-Type':'application/json',Accept:'application/json',Authorization:`Bearer ${token}`})
+export const validEmail=(value:string)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+export const validRewardForm=(value:RewardFormData,physical=false)=>Boolean(value.displayName.trim()&&validEmail(value.email)&&value.confirmed&&(!physical||(value.fullName?.trim()&&value.address?.trim()&&value.addressNumber?.trim()&&value.postalCode?.trim()&&value.city?.trim()&&value.state?.trim()&&value.country?.trim()&&value.phone?.trim()&&value.physicalConsent)))
+async function request<T>(path:string,token:string,init?:RequestInit):Promise<T>{const response=await fetch(`${endpoint}${path}`,{...init,headers:{...headers(token),...(init?.headers??{})}});if(!response.ok)throw new Error(response.status===409?'ALREADY_CLAIMED':'REWARD_SERVICE_UNAVAILABLE');return response.json() as Promise<T>}
+export const getRewardStatus=(token:string)=>request<RewardEligibility>('/v1/reward/status',token)
+export const checkRewardEligibility=(token:string,completion:CompletionProof)=>request<RewardEligibility>('/v1/reward/eligibility',token,{method:'POST',body:JSON.stringify({completion})})
+export const claimReward=(token:string,completion:CompletionProof,data:RewardFormData)=>request<RewardEligibility>('/v1/reward/claim',token,{method:'POST',headers:{'Idempotency-Key':`${completion.completionId}`},body:JSON.stringify({completion,data})})

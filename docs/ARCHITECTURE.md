@@ -46,6 +46,14 @@ EnigmaWorkspace / terminal actions
 
 Definitions contain public metadata, placeholder evidence references, hint policy, prerequisites and typed unlock effects. State contains status, progress, attempts, unlocked hint identifiers and solution timestamp. Entered answers never become part of persisted state.
 
+## Final narrative campaign
+
+The public campaign registry contains 12 ordered main definitions and spoiler-safe descriptors. Canonical briefing, question, evidence and hints are loaded from the configured narrative endpoint. Answer validation posts only the candidate, enigma ID and minimal license context; the client receives a feedback code and never receives the canonical answer.
+
+Narrative schema v2 adds campaign start/completion timestamps, classified discoveries and badges while migrating Phase 7 saves. Main progress excludes optional secret discoveries. Founder content is bonus-only and allocated by signed license number without blocking the main operation.
+
+The private reference validator and canonical manuscript map are maintained outside this repository. Production requires a hardened HTTPS deployment with license-token verification, throttling and operational logging that never records submitted answers.
+
 `LocalDevelopmentValidator` is restricted to DEV with visibly fictitious test values. `ProductionValidator` deliberately returns `VALIDATOR_UNAVAILABLE` until an external validation service is designed. Founder ranges and non-linear prerequisite arrays are represented without introducing exclusive campaign content.
 
 ## Phase 5 — Deep Search

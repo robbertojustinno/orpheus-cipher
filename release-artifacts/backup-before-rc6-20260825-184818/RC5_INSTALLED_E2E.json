@@ -1,0 +1,47 @@
+{
+  "progress12": true,
+  "finalVisible": true,
+  "exportReport": true,
+  "shareCard": true,
+  "archived": true,
+  "badge": {
+    "operatorValidated": true,
+    "cipherVerified": true,
+    "buttonFound": true,
+    "display": "block",
+    "visibility": "visible",
+    "opacity": 1,
+    "rect": {
+      "x": 583.390625,
+      "y": 559.203125,
+      "width": 177.203125,
+      "height": 36
+    },
+    "code": "CIPHER-OP-EAB6C666BC"
+  },
+  "badgeScreenshot": "C:/livro/Cipher/orpheus-app/release-artifacts/operator-validated-with-return-button.png",
+  "finalScreenshot": "C:/livro/Cipher/orpheus-app/release-artifacts/final-key-accepted.png",
+  "dashboardAfterReturn": {
+    "dashboard": true,
+    "badgeClosed": true,
+    "viewBadge": true
+  },
+  "dashboardScreenshot": "C:/livro/Cipher/orpheus-app/release-artifacts/dashboard-after-return.png",
+  "reopenedCode": "CIPHER-OP-EAB6C666BC",
+  "reopenedScreenshot": "C:/livro/Cipher/orpheus-app/release-artifacts/badge-reopened.png",
+  "sameVerificationCode": true,
+  "escapeReturned": true,
+  "layout": {
+    "innerWidth": 1350,
+    "innerHeight": 729,
+    "docWidth": 1344,
+    "docHeight": 2360,
+    "bodyWidth": 1344,
+    "bodyHeight": 2360,
+    "horizontalOverflow": false,
+    "verticalScrollable": true
+  },
+  "classifiedBefore": 3,
+  "hintsOk": true,
+  "consoleErrors": []
+}
