@@ -9,6 +9,12 @@
 </head>
 <body>
   <div class="noise"></div>
+  <div class="ambient" aria-hidden="true">
+    <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+    <span class="gridGlow"></span>
+  </div>
+  <div id="scrollProgress" class="scrollProgress"></div>
+
   <header class="topbar">
     <a class="brand" href="#top">CIPHER<span>//</span>ORPHEUS</a>
     <nav>
@@ -17,11 +23,12 @@
       <a href="#orpheus">ORPHEUS</a>
       <a href="#autor" data-pt="Autor" data-en="Author">Autor</a>
     </nav>
+    <div class="statusPill"><i></i><span data-pt="NÚCLEO ONLINE" data-en="CORE ONLINE">NÚCLEO ONLINE</span></div>
     <button id="langSwitch" class="lang">EN</button>
   </header>
 
   <main id="top">
-    <section class="hero">
+    <section class="hero reveal">
       <div class="heroCopy">
         <p class="eyebrow" data-pt="THRILLER DE ESPIONAGEM · CIBERINTELIGÊNCIA" data-en="ESPIONAGE THRILLER · CYBER INTELLIGENCE">THRILLER DE ESPIONAGEM · CIBERINTELIGÊNCIA</p>
         <h1>CIPHER</h1>
@@ -35,20 +42,31 @@
           <a class="cta primary" href="#orpheus" data-pt="ACESSAR ORPHEUS" data-en="ENTER ORPHEUS">ACESSAR ORPHEUS</a>
           <a class="cta ghost" href="#livro" data-pt="CONHECER O LIVRO" data-en="DISCOVER THE BOOK">CONHECER O LIVRO</a>
         </div>
+        <div class="heroMeta">
+          <span>01 / CIPHER</span><span>02 / ORPHEUS</span><span>03 / INVESTIGATE</span>
+        </div>
       </div>
       <div class="sigil" aria-hidden="true">
+        <div class="sweep"></div>
         <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
         <div class="cipherMark">C</div>
         <span>ORPHEUS NODE</span>
       </div>
     </section>
 
-    <section id="livro" class="panel split">
+    <section class="intelStrip reveal">
+      <div><b>STATUS</b><span data-pt="PROTOCOLO ATIVO" data-en="PROTOCOL ACTIVE">PROTOCOLO ATIVO</span></div>
+      <div><b>ACCESS</b><span data-pt="LEITOR AUTORIZADO" data-en="READER AUTHORIZED">LEITOR AUTORIZADO</span></div>
+      <div><b>MODE</b><span data-pt="INVESTIGAÇÃO" data-en="INVESTIGATION">INVESTIGAÇÃO</span></div>
+      <div><b>NETWORK</b><span>ORPHEUS NODE 01</span></div>
+    </section>
+
+    <section id="livro" class="panel split reveal">
       <div>
         <p class="sectionLabel" data-pt="O LIVRO" data-en="THE BOOK">O LIVRO</p>
         <h3 data-pt="Algumas verdades não foram feitas para permanecer enterradas." data-en="Some truths were never meant to stay buried.">Algumas verdades não foram feitas para permanecer enterradas.</h3>
       </div>
-      <div class="bodyCopy">
+      <div class="bodyCopy cardGlow">
         <p data-pt="Blake Langmere, ex-militar e especialista em segurança cibernética, vê sua rotina colidir com uma operação em que cada pista parece ter sido deixada de propósito — e cada resposta abre uma pergunta mais perigosa."
            data-en="Blake Langmere, a former soldier and cybersecurity specialist, sees his ordinary life collide with an operation where every clue seems deliberately placed — and every answer opens a more dangerous question.">
            Blake Langmere, ex-militar e especialista em segurança cibernética, vê sua rotina colidir com uma operação em que cada pista parece ter sido deixada de propósito — e cada resposta abre uma pergunta mais perigosa.
@@ -60,8 +78,12 @@
       </div>
     </section>
 
-    <section id="blake" class="character">
-      <div class="portraitFrame"><div class="portraitGlyph">BL</div></div>
+    <section id="blake" class="character reveal">
+      <div class="portraitFrame">
+        <div class="scanLine"></div>
+        <div class="portraitGlyph">BL</div>
+        <small>SUBJECT // BLAKE LANGMERE</small>
+      </div>
       <div>
         <p class="sectionLabel">BLAKE LANGMERE</p>
         <h3 data-pt="Ele aprendeu a ler sistemas. Agora precisa ler pessoas." data-en="He learned to read systems. Now he has to read people.">Ele aprendeu a ler sistemas. Agora precisa ler pessoas.</h3>
@@ -72,10 +94,10 @@
       </div>
     </section>
 
-    <section id="orpheus" class="orpheus">
+    <section id="orpheus" class="orpheus reveal">
       <div class="terminal">
         <div class="termTop"><span>ORPHEUS // ACCESS NODE</span><span>v0.7.0</span></div>
-        <div class="termBody">
+        <div class="termBody" id="terminalBody">
           <p><b>&gt;</b> system.status</p><p class="ok">CORE ONLINE</p>
           <p><b>&gt;</b> protocol.load ORPHEUS</p><p class="ok">NARRATIVE LAYER READY</p>
           <p><b>&gt;</b> authorization</p><p class="warn">BOOK ACCESS REQUIRED</p>
@@ -95,7 +117,7 @@
           <li data-pt="Dossiês e arquivos narrativos" data-en="Narrative dossiers and files">Dossiês e arquivos narrativos</li>
           <li data-pt="Progresso persistente no aplicativo" data-en="Persistent progress in the app">Progresso persistente no aplicativo</li>
         </ul>
-        <a id="downloadBtn" class="cta primary" href="https://github.com/robbertojustinno/orpheus-cipher/releases/latest/download/ORPHEUS_0.7.0_x64-setup.exe"
+        <a id="downloadBtn" class="cta primary pulseCta" href="https://github.com/robbertojustinno/orpheus-cipher/releases/latest/download/ORPHEUS_0.7.0_x64-setup.exe"
            data-pt="BAIXAR ORPHEUS PARA WINDOWS" data-en="DOWNLOAD ORPHEUS FOR WINDOWS">BAIXAR ORPHEUS PARA WINDOWS</a>
         <p class="small" data-pt="O endereço deste portal é permanente. Novas versões do instalador serão publicadas aqui."
            data-en="This portal address is permanent. New installer versions will be published here.">
@@ -104,12 +126,12 @@
       </div>
     </section>
 
-    <section id="autor" class="author panel">
+    <section id="autor" class="author panel reveal">
       <div>
         <p class="sectionLabel" data-pt="O AUTOR" data-en="THE AUTHOR">O AUTOR</p>
         <h3>ROBERTO JUSTINO</h3>
       </div>
-      <p data-pt="Autor de CIPHER e criador da experiência ORPHEUS. O projeto une ficção, investigação e tecnologia para transformar o leitor em participante da narrativa."
+      <p class="cardGlow" data-pt="Autor de CIPHER e criador da experiência ORPHEUS. O projeto une ficção, investigação e tecnologia para transformar o leitor em participante da narrativa."
          data-en="Author of CIPHER and creator of the ORPHEUS experience. The project combines fiction, investigation and technology to turn the reader into a participant in the narrative.">
          Autor de CIPHER e criador da experiência ORPHEUS. O projeto une ficção, investigação e tecnologia para transformar o leitor em participante da narrativa.
       </p>
