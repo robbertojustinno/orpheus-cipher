@@ -1,4 +1,4 @@
-name: Build ORPHEUS Windows
+name: Build and Publish ORPHEUS Windows
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -51,11 +51,24 @@ jobs:
           Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse -File |
             Where-Object { $_.Extension -in ".exe", ".msi" } |
             Copy-Item -Destination artifact
+          Get-ChildItem artifact
 
-      - name: Upload Windows installers
+      - name: Upload CI artifact
         uses: actions/upload-artifact@v4
         with:
           name: ORPHEUS-0.7.0-Windows
           path: artifact/*
           if-no-files-found: error
           retention-days: 90
+
+      - name: Publish public GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "orpheus-0.7.0"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "ORPHEUS 0.7.0 — CIPHER Companion" --notes "Official Windows companion application for CIPHER: The Orpheus Protocol."
+          }
+          gh release upload $tag artifact/* --clobber
