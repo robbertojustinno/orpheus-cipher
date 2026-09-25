@@ -51,4 +51,26 @@
       blink = !blink;
     }, 1800);
   }
+
+  const classified = document.querySelectorAll(".dossier");
+  classified.forEach((card, index) => {
+    card.addEventListener("mouseenter", () => {
+      if (Math.random() > .45) {
+        card.classList.remove("glitchOnce");
+        void card.offsetWidth;
+        card.classList.add("glitchOnce");
+      }
+    });
+  });
+
+  const book = document.querySelector(".book3d");
+  if (book && matchMedia("(pointer:fine)").matches) {
+    book.addEventListener("mousemove", (e) => {
+      const r = book.getBoundingClientRect();
+      const rx = ((e.clientY - r.top) / r.height - .5) * -5;
+      const ry = ((e.clientX - r.left) / r.width - .5) * 7;
+      book.style.transform = `translateY(-6px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    book.addEventListener("mouseleave", () => book.style.transform = "");
+  }
 })();
