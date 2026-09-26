@@ -21,12 +21,13 @@ const csvCell=value=>{let text=value==null?'':String(value);if(/^[=+\-@]/.test(t
 const limiter=(limit,windowMs)=>{const map=new Map;return key=>{const now=Date.now(),item=map.get(key);if(!item||item.until<now){map.set(key,{count:1,until:now+windowMs});return true}if(item.count>=limit)return false;item.count++;return true}}
 export function createRewardServer({cfg=loadConfig(),repo=new RewardRepository(cfg),email=new ResendEmailProvider(cfg),verifyLicense=verifyLicenseToken}={}){
  const claimAllowed=limiter(12,60_000),loginAllowed=limiter(6,15*60_000)
- const cors=r=>{const origin=r.headers.origin;return origin&&cfg.allowedOrigins.has(origin)?{'access-control-allow-origin':origin,vary:'Origin'}:{}}
+ const trustedOrigin=(r,origin)=>cfg.allowedOrigins.has(origin)||origin===`https://${r.headers.host}`
+ const cors=r=>{const origin=r.headers.origin;return origin&&trustedOrigin(r,origin)?{'access-control-allow-origin':origin,vary:'Origin'}:{}}
  const admin=async r=>readSession(repo,cookies(r).cipher_admin,cfg.sessionSecret)
  return createServer(async(r,s)=>{const url=new URL(r.url,'http://service'),origin=r.headers.origin,ip=r.socket.remoteAddress||'unknown'
   try{
-   if(r.method==='OPTIONS'){if(!origin||!cfg.allowedOrigins.has(origin))return json(r,s,403,{code:'ORIGIN_DENIED'});s.writeHead(204,{...cors(r),'access-control-allow-methods':'GET, POST, PATCH, OPTIONS','access-control-allow-headers':'content-type, authorization, idempotency-key','access-control-allow-credentials':'true'});return s.end()}
-   if(origin&&!cfg.allowedOrigins.has(origin))return json(r,s,403,{code:'ORIGIN_DENIED'})
+   if(r.method==='OPTIONS'){if(!origin||!trustedOrigin(r,origin))return json(r,s,403,{code:'ORIGIN_DENIED'});s.writeHead(204,{...cors(r),'access-control-allow-methods':'GET, POST, PATCH, OPTIONS','access-control-allow-headers':'content-type, authorization, idempotency-key','access-control-allow-credentials':'true'});return s.end()}
+   if(origin&&!trustedOrigin(r,origin))return json(r,s,403,{code:'ORIGIN_DENIED'})
    if(r.method==='GET'&&url.pathname==='/health'){try{await repo.health();return json(r,s,200,{status:'ok'})}catch{return json(r,s,503,{status:'unavailable'})}}
    if(r.method==='GET'&&url.pathname==='/v1/reward/status'){const license=verifyLicense(bearer(r));if(!license)return json(r,s,401,{code:'UNAUTHORIZED'},cors(r));return json(r,s,200,publicStatus(await repo.findByLicense(license.licenseId)),cors(r))}
    if(r.method==='POST'&&url.pathname==='/v1/reward/eligibility'){const license=verifyLicense(bearer(r));if(!license)return json(r,s,401,{code:'UNAUTHORIZED'},cors(r));const input=await body(r);if(!complete(input.completion))return json(r,s,403,{eligible:false,rewardUnlocked:false,rewardClaimed:false},cors(r));const found=await repo.findByLicense(license.licenseId),isPhysical=physical(license,input.completion);return json(r,s,200,publicStatus(found,true,isPhysical),cors(r))}
