@@ -1,7 +1,7 @@
 import pg from'pg'
 const{Pool}=pg
 export class RewardRepository{
- constructor(config){this.pool=new Pool({connectionString:config.databaseUrl,ssl:config.ssl?{rejectUnauthorized:false}:false})}
+ constructor(config){this.pool=new Pool({connectionString:config.databaseUrl,ssl:config.ssl?{rejectUnauthorized:false}:false,options:'-c search_path=cipher_rewards'})}
  async health(){await this.pool.query('SELECT 1')}
  async close(){await this.pool.end()}
  async findByLicense(licenseId){return(await this.pool.query('SELECT * FROM reward_claims WHERE license_id=$1',[licenseId])).rows[0]||null}
